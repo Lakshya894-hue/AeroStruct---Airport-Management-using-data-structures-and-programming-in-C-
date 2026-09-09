@@ -20,11 +20,10 @@ A simple Airport Management System developed using **C++17, Data Structures, and
 
 | Data Structure | Application |
 |---|---|
-| Linked List | Passenger & Baggage Records |
+| Linked List | Passenger & Baggage Records & Flight Records |
 | Queue | Check-in & Boarding |
 | Priority Queue | Emergency / VIP Passengers |
 | Stack | Undo Operations |
-| Array | Flight Records |
 | Graph | Airport Routes |
 
 ## 🛠️ Technology Stack
