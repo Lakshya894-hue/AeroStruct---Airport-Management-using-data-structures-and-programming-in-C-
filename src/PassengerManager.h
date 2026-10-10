@@ -3,12 +3,10 @@
 
 #include "Passenger.h"
 #include <cstddef>
-
+class UndoStack;
 class PassengerManager
 {
 private:
-
-    // Node of the Singly Linked List
     struct Node
     {
         Passenger data;
@@ -19,7 +17,7 @@ private:
 
     Node* head;
     Node* tail;
-    size_t size;
+    std::size_t size;
 
 public:
 
@@ -30,7 +28,10 @@ public:
     void displayPassengers();
     void searchPassenger();
     void updatePassenger();
-    void deletePassenger();
+    void deletePassenger(UndoStack& undoStack);
+
+    bool restorePassenger(const Passenger& passenger,
+                      std::size_t position);
 };
 
 #endif
