@@ -1,4 +1,5 @@
 #include "PassengerManager.h"
+#include "UndoStack.h"
 #include <iostream>
 
 using namespace std;
@@ -255,12 +256,12 @@ void PassengerManager::updatePassenger()
 }
 
 // Delete Passenger
-void PassengerManager::deletePassenger()
+// Delete Passenger and save it for undo
+void PassengerManager::deletePassenger(UndoStack& undoStack)
 {
     string id;
 
     cout << "\n========== Delete Passenger ==========\n";
-
     cout << "Enter Passenger ID to delete: ";
     getline(cin >> ws, id);
 
@@ -270,34 +271,37 @@ void PassengerManager::deletePassenger()
         return;
     }
 
-    Node* itr = head;
+    Node* current = head;
     Node* previous = nullptr;
+    std::size_t position = 1;
 
-    // Search for passenger
-    while (itr != nullptr)
+    // Find passenger and remember its position
+    while (current != nullptr)
     {
-        if (itr->data.getPassengerId() == id)
+        if (current->data.getPassengerId() == id)
         {
             break;
         }
 
-        previous = itr;
-        itr = itr->next;
+        previous = current;
+        current = current->next;
+        position++;
     }
 
-    // Passenger not found
-    if (itr == nullptr)
+    if (current == nullptr)
     {
         cout << "Passenger not found.\n";
         return;
     }
 
-    // Case 1: Deleting first node
-    if (itr == head)
+    // Save the passenger before deleting the node
+    undoStack.push(current->data, position);
+
+    // If the first node is being deleted
+    if (current == head)
     {
         head = head->next;
 
-        // If it was the only node
         if (head == nullptr)
         {
             tail = nullptr;
@@ -305,18 +309,74 @@ void PassengerManager::deletePassenger()
     }
     else
     {
-        // Remove itr node
-        previous->next = itr->next;
+        previous->next = current->next;
 
-        // If deleting last node
-        if (itr == tail)
+        // If the last node is being deleted
+        if (current == tail)
         {
             tail = previous;
         }
     }
 
-    delete itr;
+    delete current;
     size--;
 
-    cout << "Passenger deleted successfully.\n";
+    cout << "\nPassenger deleted successfully.\n";
+}
+
+// Restore a passenger saved in the Undo Stack
+bool PassengerManager::restorePassenger(
+    const Passenger& passenger, std::size_t position)
+{
+    // Avoid duplicate passenger IDs
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        if (current->data.getPassengerId() == passenger.getPassengerId())
+        {
+            return false;
+        }
+
+        current = current->next;
+    }
+
+    Node* newNode = new Node(passenger);
+
+    // Restore at the beginning
+    if (head == nullptr || position <= 1)
+    {
+        newNode->next = head;
+        head = newNode;
+
+        if (tail == nullptr)
+        {
+            tail = newNode;
+        }
+    }
+    else
+    {
+        Node* current = head;
+        std::size_t currentPosition = 1;
+
+        // Stop just before the original position
+        while (current->next != nullptr &&
+               currentPosition < position - 1)
+        {
+            current = current->next;
+            currentPosition++;
+        }
+
+        newNode->next = current->next;
+        current->next = newNode;
+
+        if (newNode->next == nullptr)
+        {
+            tail = newNode;
+        }
+    }
+
+    size++;
+
+    return true;
 }
