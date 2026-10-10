@@ -12,11 +12,7 @@ private:
         Passenger passenger;
         Node* next;
 
-        Node(const Passenger& p)
-        {
-            passenger = p;
-            next = nullptr;
-        }
+        Node(const Passenger& p): passenger(p), next(nullptr){}
     };
 
     Node* front;

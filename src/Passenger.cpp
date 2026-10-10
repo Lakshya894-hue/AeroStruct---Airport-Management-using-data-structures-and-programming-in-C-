@@ -3,41 +3,30 @@
 
 using namespace std;
 
-// Default Constructor
+// Default constructor
 Passenger::Passenger()
+    : Person(), passengerId(""), gender(""),
+      phoneNumber(""), flightNumber(""), seatNumber(""),
+      assistanceType(""), status("Registered")
 {
-    passengerId = "";
-    name = "";
-    age = 0;
-    gender = "";
-    phoneNumber = "";
-    flightNumber = "";
-    seatNumber = "";
-    assistanceType = "";
-    status = "Registered";
 }
 
-// Parameterized Constructor
-Passenger::Passenger(string id,string n,int a,
-    string g,string phone,string flight,string seat,string assistance,string stat)
+// Parameterized constructor
+Passenger::Passenger(string id, string n, int a, string g, string phone,
+                     string flight, string seat, string assistance, string stat)
+    : Person(n, a), passengerId(id), gender(g),
+      phoneNumber(phone), flightNumber(flight),
+      seatNumber(seat), assistanceType(assistance),
+      status(stat)
 {
-    passengerId = id;
-    name = n;
-    age = a;
-    gender = g;
-    phoneNumber = phone;
-    flightNumber = flight;
-    seatNumber = seat;
-    assistanceType = assistance;
-    status = stat;
 }
 
-// Display Passenger Details
+// Display passenger details
 void Passenger::display()
 {
     cout << "Passenger ID     : " << passengerId << endl;
-    cout << "Name             : " << name << endl;
-    cout << "Age              : " << age << endl;
+    cout << "Name             : " << getName() << endl;
+    cout << "Age              : " << getAge() << endl;
     cout << "Gender           : " << gender << endl;
     cout << "Phone Number     : " << phoneNumber << endl;
     cout << "Flight Number    : " << flightNumber << endl;
@@ -50,16 +39,6 @@ void Passenger::display()
 string Passenger::getPassengerId() const
 {
     return passengerId;
-}
-
-string Passenger::getName() const
-{
-    return name;
-}
-
-int Passenger::getAge() const
-{
-    return age;
 }
 
 string Passenger::getGender() const
@@ -92,17 +71,13 @@ string Passenger::getStatus() const
     return status;
 }
 
+// Compare two passengers by their ID
+bool Passenger::operator==(const Passenger& other) const
+{
+    return passengerId == other.passengerId;
+}
+
 // Setters
-void Passenger::setName(string n)
-{
-    name = n;
-}
-
-void Passenger::setAge(int a)
-{
-    age = a;
-}
-
 void Passenger::setGender(string g)
 {
     gender = g;
