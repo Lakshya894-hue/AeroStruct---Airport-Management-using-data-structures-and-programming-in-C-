@@ -1,6 +1,8 @@
 #include "FlightManager.h"
+#include "SmartFlightSuggestion.h"
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -118,6 +120,19 @@ void FlightManager::searchFlight()
     }
 
     cout << "Flight not found.\n";
+}
+
+bool FlightManager::flightExists(const std::string& flightNumber)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void FlightManager::updateFlight()
@@ -269,6 +284,75 @@ void FlightManager::sortFlights()
     }
 
     cout << "\nFlights sorted successfully by Flight Number.\n";
+}
+
+void FlightManager::suggestAlternativeFlights()
+{
+    if (size == 0)
+    {
+        cout << "\nNo flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cout << "\n========== Smart Flight Suggestions ==========\n";
+    cout << "Enter Flight Number: ";
+    getline(cin >> ws, flightNumber);
+
+    int index = -1;
+
+    // Find the selected flight
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1)
+    {
+        cout << "Flight not found.\n";
+        return;
+    }
+
+    cout << "\nSelected Flight:\n";
+    flights[index].display();
+
+    // Find alternative flights on the same route
+    vector<SmartFlightOption> alternatives =
+        SmartFlightSuggestion::findAlternatives(
+            flights[index], flights, size
+        );
+
+    if (alternatives.empty())
+    {
+        cout << "\nNo alternative flights found on this route.\n";
+        return;
+    }
+
+    cout << "\n========== Available Alternatives ==========\n";
+
+    for (size_t i = 0; i < alternatives.size(); i++)
+    {
+        cout << "\nOption " << i + 1 << endl;
+        cout << "Flight Number : "
+             << alternatives[i].flightNumber << endl;
+        cout << "Airline       : "
+             << alternatives[i].airline << endl;
+        cout << "Route         : "
+             << alternatives[i].source << " -> "
+             << alternatives[i].destination << endl;
+        cout << "Departure     : "
+             << alternatives[i].departureTime << endl;
+        cout << "Arrival       : "
+             << alternatives[i].arrivalTime << endl;
+        cout << "Status        : "
+             << alternatives[i].status << endl;
+        cout << "--------------------------------------\n";
+    }
 }
 
 FlightManager::~FlightManager()

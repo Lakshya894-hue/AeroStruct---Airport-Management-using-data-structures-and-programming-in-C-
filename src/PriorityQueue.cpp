@@ -1,4 +1,5 @@
 #include "PriorityQueue.h"
+#include "AeroAssist.h"
 #include <iostream>
 
 using namespace std;
@@ -95,14 +96,37 @@ void PriorityQueue::enqueue()
     cout << "Enter Status: ";
     getline(cin >> ws, status);
 
-    cout << "\nSelect Priority:\n";
-    cout << "1. Emergency\n";
-    cout << "2. Medical Assistance\n";
-    cout << "3. Wheelchair / Accessibility\n";
-    cout << "4. VIP\n";
-    cout << "5. Normal\n";
-    cout << "Enter priority: ";
-    cin >> priority;
+    // Get recommendation from AeroAssist
+    AeroAssistAdvice advice = AeroAssist::getAdvice(assistance);
+
+    cout << "\n========== AeroAssist Recommendation ==========\n";
+    cout << "Suggested Category : " << advice.category << endl;
+    cout << "Suggested Priority : " << advice.priority
+     << " (1 = Highest)\n";
+    cout << "Support Team       : " << advice.supportTeam << endl;
+    cout << "Recommended Action : " << advice.recommendedAction << endl;
+
+    // Let the user accept or override the recommendation
+    char choice;
+
+    cout << "\nUse AeroAssist's recommended priority? (Y/N): ";
+    cin >> choice;
+
+    if (choice == 'Y' || choice == 'y')
+    {
+        priority = advice.priority;
+        cout << "Recommended priority selected.\n";
+    }
+    else
+    {
+        cout << "\nSelect Priority:\n";
+        cout << "1. Emergency\n";
+        cout << "2. Medical Assistance\n";
+        cout << "3. Wheelchair / Accessibility\n";
+        cout << "4. VIP\n";
+        cout << "5. Normal\n";
+        cout << "Enter priority: ";
+        cin >> priority;
 
     while (cin.fail() || priority < 1 || priority > 5)
     {
@@ -112,6 +136,7 @@ void PriorityQueue::enqueue()
         cout << "Invalid priority. Enter a value from 1 to 5: ";
         cin >> priority;
     }
+}
 
     Passenger p(id, name, age, gender, phone,
                 flight, seat, assistance, status);

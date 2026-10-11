@@ -6,6 +6,7 @@
 #include "BoardingQueue.h"
 #include "PriorityQueue.h"
 #include "UndoStack.h"
+#include "AirportSystem.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ void flightMenu(FlightManager& flightManager)
         cout << "5. Delete Flight\n";
         cout << "6. Cancel Flight\n";
         cout << "7. Sort Flights\n";
+        cout << "8. Smart Flight Suggestions\n";
         cout << "0. Back\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -58,6 +60,10 @@ void flightMenu(FlightManager& flightManager)
             case 7:
                 flightManager.sortFlights();
                 break;
+            
+            case 8:
+                flightManager.suggestAlternativeFlights();
+                break;
 
             case 0:
                 cout << "Returning to main menu...\n";
@@ -72,8 +78,10 @@ void flightMenu(FlightManager& flightManager)
 
 
 // Passenger Management Menu
-void passengerMenu(PassengerManager& passengerManager,
-                   UndoStack& undoStack)
+void passengerMenu(
+    PassengerManager& passengerManager,
+    UndoStack& undoStack,
+    FlightManager& flightManager)
 {
     int choice;
 
@@ -94,7 +102,7 @@ void passengerMenu(PassengerManager& passengerManager,
         switch (choice)
         {
             case 1:
-                passengerManager.addPassenger();
+                passengerManager.addPassenger(flightManager);;
                 break;
 
             case 2:
@@ -106,7 +114,7 @@ void passengerMenu(PassengerManager& passengerManager,
                 break;
 
             case 4:
-                passengerManager.updatePassenger();
+                passengerManager.updatePassenger(flightManager);;
                 break;
 
             case 5:
@@ -257,14 +265,30 @@ void priorityMenu(PriorityQueue& priorityQueue)
 
 
 // Main Function
+
 int main()
 {
-    FlightManager flightManager;
-    PassengerManager passengerManager;
-    CheckInQueue checkInQueue;
-    BoardingQueue boardingQueue;
-    PriorityQueue priorityQueue;
-    UndoStack undoStack;
+    // One AirportSystem object owns all the managers and queues.
+    AirportSystem airportSystem;
+
+    // Get references to the components owned by AirportSystem.
+    FlightManager& flightManager =
+        airportSystem.getFlightManager();
+
+    PassengerManager& passengerManager =
+        airportSystem.getPassengerManager();
+
+    CheckInQueue& checkInQueue =
+        airportSystem.getCheckInQueue();
+
+    BoardingQueue& boardingQueue =
+        airportSystem.getBoardingQueue();
+
+    PriorityQueue& priorityQueue =
+        airportSystem.getPriorityQueue();
+
+    UndoStack& undoStack =
+        airportSystem.getUndoStack();
 
     int choice;
 
@@ -291,7 +315,7 @@ int main()
                 break;
 
             case 2:
-                passengerMenu(passengerManager, undoStack);;
+                passengerMenu(passengerManager, undoStack, flightManager);;
                 break;
 
             case 3:
