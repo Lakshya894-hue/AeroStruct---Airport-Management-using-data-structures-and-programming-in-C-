@@ -1,5 +1,6 @@
 #include "PassengerManager.h"
 #include "UndoStack.h"
+#include "FlightManager.h"
 #include <iostream>
 
 using namespace std;
@@ -30,24 +31,19 @@ PassengerManager::~PassengerManager()
 }
 
 // Add Passenger
-void PassengerManager::addPassenger()
+
+void PassengerManager::addPassenger(FlightManager& flightManager)
 {
-    string id;
-    string name;
+    string id, name, gender, phone;
+    string flight, seat, assistance, status;
     int age;
-    string gender;
-    string phone;
-    string flight;
-    string seat;
-    string assistance;
-    string status;
 
     cout << "\n========== Add Passenger ==========\n";
 
     cout << "Enter Passenger ID: ";
     getline(cin >> ws, id);
 
-    // Check for duplicate Passenger ID
+    // Check for duplicate passenger ID
     Node* itr = head;
 
     while (itr != nullptr)
@@ -82,8 +78,15 @@ void PassengerManager::addPassenger()
     cout << "Enter Phone Number: ";
     getline(cin >> ws, phone);
 
+    // Validate the passenger's flight
     cout << "Enter Flight Number: ";
     getline(cin >> ws, flight);
+
+    if (!flightManager.flightExists(flight))
+    {
+        cout << "Flight does not exist. Please add the flight first.\n";
+        return;
+    }
 
     cout << "Enter Seat Number: ";
     getline(cin >> ws, seat);
@@ -94,14 +97,13 @@ void PassengerManager::addPassenger()
     cout << "Enter Status: ";
     getline(cin >> ws, status);
 
-    // Create Passenger object
+    // Create the Passenger object
     Passenger passenger(id, name, age, gender, phone,
                         flight, seat, assistance, status);
 
-    // Create new node
+    // Insert the passenger into the linked list
     Node* newNode = new Node(passenger);
 
-    // If list is empty
     if (head == nullptr)
     {
         head = newNode;
@@ -109,7 +111,6 @@ void PassengerManager::addPassenger()
     }
     else
     {
-        // Add at end
         tail->next = newNode;
         tail = newNode;
     }
@@ -118,6 +119,7 @@ void PassengerManager::addPassenger()
 
     cout << "\nPassenger added successfully.\n";
 }
+
 
 // Display All Passengers
 void PassengerManager::displayPassengers()
@@ -174,12 +176,11 @@ void PassengerManager::searchPassenger()
 }
 
 // Update Passenger
-void PassengerManager::updatePassenger()
+void PassengerManager::updatePassenger(FlightManager& flightManager)
 {
     string id;
 
     cout << "\n========== Update Passenger ==========\n";
-
     cout << "Enter Passenger ID to update: ";
     getline(cin >> ws, id);
 
@@ -222,8 +223,15 @@ void PassengerManager::updatePassenger()
             cout << "Enter Phone Number: ";
             getline(cin >> ws, phone);
 
+            // Validate the flight number
             cout << "Enter Flight Number: ";
             getline(cin >> ws, flight);
+
+            if (!flightManager.flightExists(flight))
+            {
+                cout << "Flight does not exist. Update cancelled.\n";
+                return;
+            }
 
             cout << "Enter Seat Number: ";
             getline(cin >> ws, seat);
@@ -234,7 +242,7 @@ void PassengerManager::updatePassenger()
             cout << "Enter Status: ";
             getline(cin >> ws, status);
 
-            // Update passenger data
+            // Update passenger data only after validation
             itr->data.setName(name);
             itr->data.setAge(age);
             itr->data.setGender(gender);
@@ -245,7 +253,6 @@ void PassengerManager::updatePassenger()
             itr->data.setStatus(status);
 
             cout << "Passenger updated successfully.\n";
-
             return;
         }
 

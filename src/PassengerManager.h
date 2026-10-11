@@ -4,6 +4,7 @@
 #include "Passenger.h"
 #include <cstddef>
 class UndoStack;
+class FlightManager;
 class PassengerManager
 {
 private:
@@ -26,10 +27,10 @@ public:
     PassengerManager();
     ~PassengerManager();
 
-    void addPassenger();
+    void addPassenger(FlightManager& flightManager);
     void displayPassengers();
     void searchPassenger();
-    void updatePassenger();
+    void updatePassenger(FlightManager& flightManager);
     void deletePassenger(UndoStack& undoStack);
 
     bool restorePassenger(const Passenger& passenger,
