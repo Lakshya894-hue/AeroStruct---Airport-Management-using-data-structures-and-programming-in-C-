@@ -7,9 +7,7 @@ using namespace std;
 Passenger::Passenger()
     : Person(), passengerId(""), gender(""),
       phoneNumber(""), flightNumber(""), seatNumber(""),
-      assistanceType(""), status("Registered")
-{
-}
+      assistanceType(""), status("Registered"){}
 
 // Parameterized constructor
 Passenger::Passenger(string id, string n, int a, string g, string phone,
@@ -17,9 +15,7 @@ Passenger::Passenger(string id, string n, int a, string g, string phone,
     : Person(n, a), passengerId(id), gender(g),
       phoneNumber(phone), flightNumber(flight),
       seatNumber(seat), assistanceType(assistance),
-      status(stat)
-{
-}
+      status(stat){}
 
 // Display passenger details
 void Passenger::display()
