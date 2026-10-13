@@ -4,6 +4,8 @@
 #include "Flight.h"
 #include <string>
 
+class PassengerManager;
+class NotificationManager;
 class FlightManager
 {
 private:
@@ -18,9 +20,9 @@ public:
     void addFlight();
     void displayFlights();
     void searchFlight();
-    void updateFlight();
+    void updateFlight(PassengerManager& passengerManager, NotificationManager& notificationManager);
     void deleteFlight();
-    void cancelFlight();
+    void cancelFlight(PassengerManager& passengerManager, NotificationManager& notificationManager);
     void sortFlights();
     void suggestAlternativeFlights();
     bool flightExists(const std::string& flightNumber);

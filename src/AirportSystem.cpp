@@ -29,3 +29,8 @@ UndoStack& AirportSystem::getUndoStack()
 {
     return undoStack;
 }
+
+NotificationManager& AirportSystem::getNotificationManager()
+{
+    return notificationManager;
+}

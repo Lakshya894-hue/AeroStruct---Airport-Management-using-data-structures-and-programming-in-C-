@@ -1,4 +1,6 @@
 #include "BoardingQueue.h"
+#include "PassengerManager.h"
+#include "NotificationManager.h"
 #include <iostream>
 
 using namespace std;
@@ -28,24 +30,20 @@ bool BoardingQueue::isEmpty() const
     return front == nullptr;
 }
 
-void BoardingQueue::enqueue()
+// Enqueue a registered passenger and generate a boarding reminder
+void BoardingQueue::enqueue(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager)
 {
-    string id;
-    string name;
+    string id, name, gender, phone;
+    string flight, seat, assistance, status, gate;
     int age;
-    string gender;
-    string phone;
-    string flight;
-    string seat;
-    string assistance;
-    string status;
 
     cout << "\n========== Boarding Queue ==========\n";
-
-    cout << "Enter Passenger ID: ";
+    cout << "Enter Registered Passenger ID: ";
     getline(cin >> ws, id);
 
-    // Check if passenger is already waiting for boarding
+    // Prevent duplicate entries in the boarding queue
     Node* current = front;
 
     while (current != nullptr)
@@ -59,43 +57,38 @@ void BoardingQueue::enqueue()
         current = current->next;
     }
 
-    cout << "Enter Name: ";
-    getline(cin >> ws, name);
-
-    cout << "Enter Age: ";
-    cin >> age;
-
-    while (cin.fail() || age < 0)
+    // Retrieve details from Passenger Management
+    if (!passengerManager.getPassengerQueueDetails(
+            id, name, age, gender, phone, flight,
+            seat, assistance, status))
     {
-        cin.clear();
-        cin.ignore(1000, '\n');
+        cout << "Passenger not found in Passenger Management.\n";
+        cout << "Please register the passenger first.\n";
+        return;
+    }
+    // Only checked-in passengers can enter the boarding queue
+    string normalizedStatus = status;
 
-        cout << "Invalid age. Enter again: ";
-        cin >> age;
+    for (char& ch : normalizedStatus)
+    {
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     }
 
-    cout << "Enter Gender: ";
-    getline(cin >> ws, gender);
+    if (normalizedStatus != "checked-in" &&normalizedStatus != "checked in")
+    {
+        cout << "Boarding denied: passenger must complete check-in first.\n";
+        cout << "Current passenger status: " << status << "\n";
+        return;
+    }
 
-    cout << "Enter Phone Number: ";
-    getline(cin >> ws, phone);
+    cout << "Enter Boarding Gate: ";
+    getline(cin >> ws, gate);
 
-    cout << "Enter Flight Number: ";
-    getline(cin >> ws, flight);
+    Passenger passenger(
+        id, name, age, gender, phone,
+        flight, seat, assistance, status);
 
-    cout << "Enter Seat Number: ";
-    getline(cin >> ws, seat);
-
-    cout << "Enter Assistance Type: ";
-    getline(cin >> ws, assistance);
-
-    cout << "Enter Status: ";
-    getline(cin >> ws, status);
-
-    Passenger p(id, name, age, gender, phone,
-                flight, seat, assistance, status);
-
-    Node* newNode = new Node(p);
+    Node* newNode = new Node(passenger);
 
     if (front == nullptr)
     {
@@ -110,10 +103,14 @@ void BoardingQueue::enqueue()
 
     size++;
 
-    cout << "Passenger added to boarding queue.\n";
+    cout << "Passenger added to boarding queue successfully.\n";
+
+    // Create the personalized boarding notification
+    notificationManager.sendBoardingReminder(
+        id, name, flight, gate);
 }
 
-void BoardingQueue::dequeue()
+void BoardingQueue::dequeue(PassengerManager& passengerManager)
 {
     if (isEmpty())
     {
@@ -124,10 +121,16 @@ void BoardingQueue::dequeue()
     Node* temp = front;
 
     cout << "\n========== Boarding Passenger ==========\n";
-
     cout << "Passenger boarding now:\n";
     temp->passenger.display();
 
+    string passengerId = temp->passenger.getPassengerId();
+
+    // Update the original passenger record
+    bool updated = passengerManager.updatePassengerStatus(
+        passengerId, "Boarded");
+
+    // Remove passenger from the boarding queue
     front = front->next;
 
     if (front == nullptr)
@@ -138,7 +141,16 @@ void BoardingQueue::dequeue()
     delete temp;
     size--;
 
-    cout << "\nPassenger has boarded successfully.\n";
+    if (updated)
+    {
+        cout << "\nPassenger has boarded successfully.\n";
+        cout << "Passenger status updated to Boarded.\n";
+    }
+    else
+    {
+        cout << "\nQueue entry processed, but the passenger record "
+             << "was not found.\n";
+    }
 }
 
 void BoardingQueue::displayQueue()

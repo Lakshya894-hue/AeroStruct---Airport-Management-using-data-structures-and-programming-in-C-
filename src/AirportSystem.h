@@ -7,6 +7,7 @@
 #include "BoardingQueue.h"
 #include "PriorityQueue.h"
 #include "UndoStack.h"
+#include "NotificationManager.h"
 
 class AirportSystem
 {
@@ -17,6 +18,7 @@ private:
     BoardingQueue boardingQueue;
     PriorityQueue priorityQueue;
     UndoStack undoStack;
+    NotificationManager notificationManager;
 
 public:
     FlightManager& getFlightManager();
@@ -25,6 +27,7 @@ public:
     BoardingQueue& getBoardingQueue();
     PriorityQueue& getPriorityQueue();
     UndoStack& getUndoStack();
+    NotificationManager& getNotificationManager();
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "PassengerManager.h"
 #include "UndoStack.h"
 #include "FlightManager.h"
+#include "NotificationManager.h"
 #include <iostream>
 
 using namespace std;
@@ -386,4 +387,211 @@ bool PassengerManager::restorePassenger(
     size++;
 
     return true;
+}
+
+// Retrieve passenger details for personalized notifications
+bool PassengerManager::getPassengerNotificationDetails(
+    const std::string& passengerId,
+    std::string& passengerName,
+    std::string& flightNumber) const
+{
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        if (current->data.getPassengerId() == passengerId)
+        {
+            passengerName = current->data.getName();
+            flightNumber = current->data.getFlightNumber();
+
+            return true;
+        }
+
+        current = current->next;
+    }
+
+    return false;
+}
+
+// Notify all registered passengers affected by a flight cancellation
+void PassengerManager::notifyFlightCancellation(
+    const std::string& flightNumber,
+    NotificationManager& notificationManager,
+    const std::string& reason)
+{
+    Node* current = head;
+    int notifiedCount = 0;
+
+    while (current != nullptr)
+    {
+        Passenger& passenger = current->data;
+
+        // Find passengers booked on the cancelled flight
+        if (passenger.getFlightNumber() == flightNumber)
+        {
+            notificationManager.notifyCancellation(
+                passenger.getPassengerId(),
+                passenger.getName(),
+                flightNumber,
+                reason
+            );
+
+            notifiedCount++;
+        }
+
+        current = current->next;
+    }
+
+    if (notifiedCount == 0)
+    {
+        std::cout << "No registered passengers were found for flight "
+                  << flightNumber << ".\n";
+    }
+    else
+    {
+        std::cout << "Cancellation notifications created for "
+                  << notifiedCount << " passenger(s).\n";
+    }
+}
+
+// Notify passengers about a flight delay
+void PassengerManager::notifyFlightDelay(
+    const std::string& flightNumber,
+    NotificationManager& notificationManager,
+    const std::string& revisedDeparture,
+    const std::string& reason)
+{
+    Node* current = head;
+    int notifiedCount = 0;
+
+    while (current != nullptr)
+    {
+        Passenger& passenger = current->data;
+
+        if (passenger.getFlightNumber() == flightNumber)
+        {
+            notificationManager.notifyDelay(
+                passenger.getPassengerId(),
+                passenger.getName(),
+                flightNumber,
+                revisedDeparture,
+                reason
+            );
+
+            notifiedCount++;
+        }
+
+        current = current->next;
+    }
+
+    if (notifiedCount == 0)
+    {
+        cout << "No registered passengers found for flight "
+             << flightNumber << ".\n";
+    }
+    else
+    {
+        cout << "Delay notifications created for "
+             << notifiedCount << " passenger(s).\n";
+    }
+}
+
+
+// Notify passengers about a flight status update
+void PassengerManager::notifyFlightStatusUpdate(
+    const std::string& flightNumber,
+    NotificationManager& notificationManager,
+    const std::string& status)
+{
+    Node* current = head;
+    int notifiedCount = 0;
+
+    while (current != nullptr)
+    {
+        Passenger& passenger = current->data;
+
+        if (passenger.getFlightNumber() == flightNumber)
+        {
+            notificationManager.notifyFlightStatus(
+                passenger.getPassengerId(),
+                passenger.getName(),
+                flightNumber,
+                status
+            );
+
+            notifiedCount++;
+        }
+
+        current = current->next;
+    }
+
+    if (notifiedCount == 0)
+    {
+        cout << "No registered passengers found for flight "
+             << flightNumber << ".\n";
+    }
+    else
+    {
+        cout << "Status notifications created for "
+             << notifiedCount << " passenger(s).\n";
+    }
+}
+
+// Retrieve registered passenger details for queue operations
+bool PassengerManager::getPassengerQueueDetails(
+    const std::string& passengerId,
+    std::string& passengerName,
+    int& age,
+    std::string& gender,
+    std::string& phoneNumber,
+    std::string& flightNumber,
+    std::string& seatNumber,
+    std::string& assistanceType,
+    std::string& status) const
+{
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        const Passenger& passenger = current->data;
+
+        if (passenger.getPassengerId() == passengerId)
+        {
+            passengerName = passenger.getName();
+            age = passenger.getAge();
+            gender = passenger.getGender();
+            phoneNumber = passenger.getPhoneNumber();
+            flightNumber = passenger.getFlightNumber();
+            seatNumber = passenger.getSeatNumber();
+            assistanceType = passenger.getAssistanceType();
+            status = passenger.getStatus();
+
+            return true;
+        }
+
+        current = current->next;
+    }
+
+    return false;
+}
+
+// Update the status of a registered passenger
+bool PassengerManager::updatePassengerStatus(
+    const std::string& passengerId,
+    const std::string& newStatus)
+{
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        if (current->data.getPassengerId() == passengerId)
+        {
+            current->data.setStatus(newStatus);
+            return true;
+        }
+
+        current = current->next;
+    }
+
+    return false;
 }

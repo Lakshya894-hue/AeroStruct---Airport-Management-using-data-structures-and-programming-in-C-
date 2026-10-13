@@ -3,6 +3,9 @@
 
 #include "Passenger.h"
 #include <cstddef>
+class PassengerManager;
+class NotificationManager;
+class PassengerManager;
 
 class BoardingQueue
 {
@@ -23,8 +26,8 @@ public:
     BoardingQueue();
     ~BoardingQueue();
 
-    void enqueue();
-    void dequeue();
+    void enqueue(PassengerManager& passengerManager, NotificationManager& notificationManager);
+    void dequeue(PassengerManager& passengerManager);
     void displayQueue();
 
     bool isEmpty() const;

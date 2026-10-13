@@ -7,12 +7,15 @@
 #include "PriorityQueue.h"
 #include "UndoStack.h"
 #include "AirportSystem.h"
+#include "NotificationManager.h"
+#include <limits>
 
 using namespace std;
 
 
 // Flight Management Menu
-void flightMenu(FlightManager& flightManager)
+void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager,
+    NotificationManager& notificationManager)
 {
     int choice;
 
@@ -46,7 +49,7 @@ void flightMenu(FlightManager& flightManager)
                 break;
 
             case 4:
-                flightManager.updateFlight();
+                flightManager.updateFlight(passengerManager, notificationManager);
                 break;
 
             case 5:
@@ -54,7 +57,7 @@ void flightMenu(FlightManager& flightManager)
                 break;
 
             case 6:
-                flightManager.cancelFlight();
+                flightManager.cancelFlight(passengerManager, notificationManager);
                 break;
 
             case 7:
@@ -142,7 +145,8 @@ void passengerMenu(
 
 
 // Check-In Menu
-void checkInMenu(CheckInQueue& checkInQueue)
+void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager,
+    NotificationManager& notificationManager)
 {
     int choice;
 
@@ -159,7 +163,7 @@ void checkInMenu(CheckInQueue& checkInQueue)
         switch (choice)
         {
             case 1:
-                checkInQueue.enqueue();
+                checkInQueue.enqueue(passengerManager, notificationManager);
                 break;
 
             case 2:
@@ -167,7 +171,7 @@ void checkInMenu(CheckInQueue& checkInQueue)
                 break;
 
             case 3:
-                checkInQueue.dequeue();
+                checkInQueue.dequeue(passengerManager);
                 break;
 
             case 0:
@@ -183,7 +187,8 @@ void checkInMenu(CheckInQueue& checkInQueue)
 
 
 // Boarding Menu
-void boardingMenu(BoardingQueue& boardingQueue)
+void boardingMenu(BoardingQueue& boardingQueue,PassengerManager& passengerManager, 
+    NotificationManager& notificationManager)
 {
     int choice;
 
@@ -200,7 +205,7 @@ void boardingMenu(BoardingQueue& boardingQueue)
         switch (choice)
         {
             case 1:
-                boardingQueue.enqueue();
+                boardingQueue.enqueue(passengerManager, notificationManager);
                 break;
 
             case 2:
@@ -208,7 +213,7 @@ void boardingMenu(BoardingQueue& boardingQueue)
                 break;
 
             case 3:
-                boardingQueue.dequeue();
+                boardingQueue.dequeue(passengerManager);
                 break;
 
             case 0:
@@ -263,6 +268,206 @@ void priorityMenu(PriorityQueue& priorityQueue)
     } while (choice != 0);
 }
 
+// Personalized Airport Notifications Menu
+void notificationMenu(NotificationManager& notificationManager)
+{
+    int choice;
+
+    do
+    {
+        cout << "\n========== Personalized Airport Notifications ==========\n";
+        cout << "1. Send Check-In Reminder\n";
+        cout << "2. Send Boarding Reminder\n";
+        cout << "3. Notify Gate Change\n";
+        cout << "4. Notify Flight Status Update\n";
+        cout << "5. Notify Flight Delay\n";
+        cout << "6. Notify Flight Cancellation\n";
+        cout << "7. View Passenger Notifications\n";
+        cout << "8. View All Notifications\n";
+        cout << "9. View Unread Notifications\n";
+        cout << "10. Mark Passenger Notifications as Read\n";
+        cout << "0. Back\n";
+        cout << "Enter your choice: ";
+
+        if (!(cin >> choice))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        // Clear the newline before reading text with getline().
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        string passengerId, passengerName, flightNumber;
+        string gate, oldGate, newGate;
+        string status, revisedDeparture, reason;
+
+        switch (choice)
+        {
+            case 1:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                notificationManager.sendCheckInReminder(
+                    passengerId, passengerName, flightNumber);
+                break;
+
+            case 2:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                cout << "Enter Boarding Gate: ";
+                getline(cin, gate);
+
+                notificationManager.sendBoardingReminder(
+                    passengerId, passengerName, flightNumber, gate);
+                break;
+
+            case 3:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                cout << "Enter Old Gate: ";
+                getline(cin, oldGate);
+
+                cout << "Enter New Gate: ";
+                getline(cin, newGate);
+
+                notificationManager.notifyGateChange(
+                    passengerId, passengerName, flightNumber,
+                    oldGate, newGate);
+                break;
+
+            case 4:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                cout << "Enter Flight Status: ";
+                getline(cin, status);
+
+                notificationManager.notifyFlightStatus(
+                    passengerId, passengerName, flightNumber, status);
+                break;
+
+            case 5:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                cout << "Enter Revised Departure Time: ";
+                getline(cin, revisedDeparture);
+
+                cout << "Enter Delay Reason: ";
+                getline(cin, reason);
+
+                if (reason.empty())
+                {
+                    notificationManager.notifyDelay(
+                        passengerId, passengerName, flightNumber,
+                        revisedDeparture);
+                }
+                else
+                {
+                    notificationManager.notifyDelay(
+                        passengerId, passengerName, flightNumber,
+                        revisedDeparture, reason);
+                }
+                break;
+
+            case 6:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                cout << "Enter Passenger Name: ";
+                getline(cin, passengerName);
+
+                cout << "Enter Flight Number: ";
+                getline(cin, flightNumber);
+
+                cout << "Enter Cancellation Reason: ";
+                getline(cin, reason);
+
+                if (reason.empty())
+                {
+                    notificationManager.notifyCancellation(
+                        passengerId, passengerName, flightNumber);
+                }
+                else
+                {
+                    notificationManager.notifyCancellation(
+                        passengerId, passengerName, flightNumber, reason);
+                }
+                break;
+
+            case 7:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                notificationManager.displayPassengerNotifications(
+                    passengerId);
+                break;
+
+            case 8:
+                notificationManager.displayAllNotifications();
+                break;
+
+            case 9:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                notificationManager.displayUnreadNotifications(
+                    passengerId);
+                break;
+
+            case 10:
+                cout << "Enter Passenger ID: ";
+                getline(cin, passengerId);
+
+                notificationManager.markPassengerNotificationsRead(
+                    passengerId);
+                break;
+
+            case 0:
+                cout << "Returning to main menu...\n";
+                break;
+
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+
+    } while (choice != 0);
+}
 
 // Main Function
 
@@ -272,23 +477,19 @@ int main()
     AirportSystem airportSystem;
 
     // Get references to the components owned by AirportSystem.
-    FlightManager& flightManager =
-        airportSystem.getFlightManager();
+    FlightManager& flightManager = airportSystem.getFlightManager();
 
-    PassengerManager& passengerManager =
-        airportSystem.getPassengerManager();
+    PassengerManager& passengerManager = airportSystem.getPassengerManager();
 
-    CheckInQueue& checkInQueue =
-        airportSystem.getCheckInQueue();
+    CheckInQueue& checkInQueue = airportSystem.getCheckInQueue();
 
-    BoardingQueue& boardingQueue =
-        airportSystem.getBoardingQueue();
+    BoardingQueue& boardingQueue = airportSystem.getBoardingQueue();
 
-    PriorityQueue& priorityQueue =
-        airportSystem.getPriorityQueue();
+    PriorityQueue& priorityQueue = airportSystem.getPriorityQueue();
 
-    UndoStack& undoStack =
-        airportSystem.getUndoStack();
+    UndoStack& undoStack = airportSystem.getUndoStack();
+
+    NotificationManager& notificationManager = airportSystem.getNotificationManager();
 
     int choice;
 
@@ -303,6 +504,7 @@ int main()
         cout << "3. Check-In Management\n";
         cout << "4. Boarding Management\n";
         cout << "5. Priority Assistance\n";
+        cout << "6. Personalized Airport Notifications\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
 
@@ -311,7 +513,7 @@ int main()
         switch (choice)
         {
             case 1:
-                flightMenu(flightManager);
+                flightMenu(flightManager,passengerManager,notificationManager);
                 break;
 
             case 2:
@@ -319,15 +521,19 @@ int main()
                 break;
 
             case 3:
-                checkInMenu(checkInQueue);
+                checkInMenu(checkInQueue, passengerManager, notificationManager);
                 break;
 
             case 4:
-                boardingMenu(boardingQueue);
+                boardingMenu(boardingQueue, passengerManager, notificationManager);
                 break;
 
             case 5:
                 priorityMenu(priorityQueue);
+                break;
+            
+            case 6:
+                notificationMenu(notificationManager);
                 break;
 
             case 0:

@@ -1,4 +1,8 @@
 #include "CheckInQueue.h"
+#include "PassengerManager.h"
+#include "NotificationManager.h"
+#include "PassengerManager.h"
+#include <cctype>
 #include <iostream>
 
 using namespace std;
@@ -35,24 +39,20 @@ bool CheckInQueue::isEmpty() const
 }
 
 // Enqueue Passenger
-void CheckInQueue::enqueue()
+// Enqueue a registered passenger and generate a check-in notification
+void CheckInQueue::enqueue(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager)
 {
-    string id;
-    string name;
+    string id, name, gender, phone;
+    string flight, seat, assistance, status;
     int age;
-    string gender;
-    string phone;
-    string flight;
-    string seat;
-    string assistance;
-    string status;
 
     cout << "\n========== Check-In ==========\n";
-
-    cout << "Enter Passenger ID: ";
+    cout << "Enter Registered Passenger ID: ";
     getline(cin >> ws, id);
 
-    // Check whether passenger is already in the queue
+    // Prevent duplicate entries in the queue
     Node* current = front;
 
     while (current != nullptr)
@@ -66,46 +66,34 @@ void CheckInQueue::enqueue()
         current = current->next;
     }
 
-    cout << "Enter Name: ";
-    getline(cin >> ws, name);
-
-    cout << "Enter Age: ";
-    cin >> age;
-
-    while (cin.fail() || age < 0)
+    // Retrieve details from Passenger Management
+    if (!passengerManager.getPassengerQueueDetails(
+            id, name, age, gender, phone, flight,
+            seat, assistance, status))
     {
-        cin.clear();
-        cin.ignore(1000, '\n');
-
-        cout << "Invalid age. Enter again: ";
-        cin >> age;
+        cout << "Passenger not found in Passenger Management.\n";
+        cout << "Please register the passenger first.\n";
+        return;
     }
 
-    cout << "Enter Gender: ";
-    getline(cin >> ws, gender);
+    // Prevent passengers from checking in twice
+    string normalizedStatus = status;
 
-    cout << "Enter Phone Number: ";
-    getline(cin >> ws, phone);
+    for (char& ch : normalizedStatus)
+    {
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+    }
 
-    cout << "Enter Flight Number: ";
-    getline(cin >> ws, flight);
+    if (normalizedStatus == "checked-in" ||normalizedStatus == "checked in" ||normalizedStatus == "boarded")
+    {
+        cout << "Passenger has already checked in or boarded.\n";
+        return;
+    }
 
-    cout << "Enter Seat Number: ";
-    getline(cin >> ws, seat);
-
-    cout << "Enter Assistance Type: ";
-    getline(cin >> ws, assistance);
-
-    cout << "Enter Status: ";
-    getline(cin >> ws, status);
-
-    Passenger passenger(id,name,age,gender,
-        phone,flight,seat,assistance,status
-    );
+    Passenger passenger(id, name, age, gender, phone,flight, seat, assistance, status);
 
     Node* newNode = new Node(passenger);
 
-    // If queue is empty
     if (front == nullptr)
     {
         front = newNode;
@@ -113,7 +101,6 @@ void CheckInQueue::enqueue()
     }
     else
     {
-        // Insert at rear
         rear->next = newNode;
         rear = newNode;
     }
@@ -121,10 +108,13 @@ void CheckInQueue::enqueue()
     size++;
 
     cout << "\nPassenger added to check-in queue successfully.\n";
-}
 
+    // Create the personalized check-in notification
+    notificationManager.sendCheckInReminder(
+        id, name, flight);
+}
 // Dequeue Passenger
-void CheckInQueue::dequeue()
+void CheckInQueue::dequeue(PassengerManager& passengerManager)
 {
     if (isEmpty())
     {
@@ -135,14 +125,18 @@ void CheckInQueue::dequeue()
     Node* temp = front;
 
     cout << "\n========== Processing Passenger ==========\n";
-
     cout << "Passenger being processed:\n";
     temp->data.display();
 
-    // Move front to next passenger
+    string passengerId = temp->data.getPassengerId();
+
+    // Update the original passenger record
+    bool updated = passengerManager.updatePassengerStatus(
+        passengerId, "Checked-In");
+
+    // Remove passenger from the queue
     front = front->next;
 
-    // If queue becomes empty
     if (front == nullptr)
     {
         rear = nullptr;
@@ -151,7 +145,16 @@ void CheckInQueue::dequeue()
     delete temp;
     size--;
 
-    cout << "\nPassenger processed successfully.\n";
+    if (updated)
+    {
+        cout << "\nCheck-in completed successfully.\n";
+        cout << "Passenger status updated to Checked-In.\n";
+    }
+    else
+    {
+        cout << "\nQueue entry processed, but the passenger record "
+             << "was not found.\n";
+    }
 }
 
 // Display Queue

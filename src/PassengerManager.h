@@ -3,8 +3,10 @@
 
 #include "Passenger.h"
 #include <cstddef>
+#include <string>
 class UndoStack;
 class FlightManager;
+class NotificationManager;
 class PassengerManager
 {
 private:
@@ -33,8 +35,35 @@ public:
     void updatePassenger(FlightManager& flightManager);
     void deletePassenger(UndoStack& undoStack);
 
-    bool restorePassenger(const Passenger& passenger,
-                      std::size_t position);
+    bool restorePassenger(const Passenger& passenger,std::size_t position);
+
+
+    bool getPassengerNotificationDetails(const std::string& passengerId, std::string& passengerName,
+    std::string& flightNumber) const;
+    void notifyFlightCancellation(
+    const std::string& flightNumber,
+    NotificationManager& notificationManager,
+    const std::string& reason = "The flight has been cancelled");
+
+    void notifyFlightDelay(const std::string& flightNumber, NotificationManager& notificationManager,
+    const std::string& revisedDeparture,
+    const std::string& reason = "Operational reasons");
+
+    void notifyFlightStatusUpdate(const std::string& flightNumber,
+    NotificationManager& notificationManager,
+    const std::string& status);
+
+    bool getPassengerQueueDetails(const std::string& passengerId, std::string& passengerName, int& age,
+    std::string& gender,
+    std::string& phoneNumber,
+    std::string& flightNumber,
+    std::string& seatNumber,
+    std::string& assistanceType,
+    std::string& status) const;
+
+    bool updatePassengerStatus(
+    const std::string& passengerId,
+    const std::string& newStatus);
 };
 
 #endif

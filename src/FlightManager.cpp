@@ -1,5 +1,7 @@
 #include "FlightManager.h"
 #include "SmartFlightSuggestion.h"
+#include "PassengerManager.h"
+#include "NotificationManager.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -135,7 +137,9 @@ bool FlightManager::flightExists(const std::string& flightNumber)
     return false;
 }
 
-void FlightManager::updateFlight()
+void FlightManager::updateFlight(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager)
 {
     if (size == 0)
     {
@@ -145,9 +149,8 @@ void FlightManager::updateFlight()
 
     string flightNumber;
 
-    cin.ignore();
     cout << "Enter Flight Number to update: ";
-    getline(cin,flightNumber);
+    getline(cin >> ws, flightNumber);
 
     for (int i = 0; i < size; i++)
     {
@@ -160,25 +163,67 @@ void FlightManager::updateFlight()
             string arrivalTime;
             string status;
 
-            cin.ignore();
+            // Save the old details before updating the flight
+            string oldDeparture = flights[i].getDepartureTime();
+            string oldStatus = flights[i].getStatus();
+
+            cout << "\nFlight found. Enter updated details:\n";
+
             cout << "Enter Airline: ";
-            getline(cin,airline);
+            getline(cin, airline);
 
             cout << "Enter Source: ";
-            getline(cin,source);
+            getline(cin, source);
 
             cout << "Enter Destination: ";
-            getline(cin,destination);
+            getline(cin, destination);
 
             cout << "Enter Departure Time: ";
-            getline(cin,departureTime);
+            getline(cin, departureTime);
 
             cout << "Enter Arrival Time: ";
-            getline(cin,arrivalTime);
+            getline(cin, arrivalTime);
 
             cout << "Enter Status: ";
-            getline(cin,status);
+            getline(cin, status);
 
+            // Normalize status text for comparisons
+            string normalizedStatus = status;
+
+            for (char& ch : normalizedStatus)
+            {
+                ch = static_cast<char>(
+                    tolower(static_cast<unsigned char>(ch))
+                );
+            }
+
+            string normalizedOldStatus = oldStatus;
+
+            for (char& ch : normalizedOldStatus)
+            {
+                ch = static_cast<char>(
+                    tolower(static_cast<unsigned char>(ch))
+                );
+            }
+
+            bool departureChanged =
+                oldDeparture != departureTime;
+
+            bool statusChanged =
+                oldStatus != status;
+
+            bool isCancelled =
+                normalizedStatus == "cancelled" ||
+                normalizedStatus == "canceled";
+
+            bool wasCancelled =
+                normalizedOldStatus == "cancelled" ||
+                normalizedOldStatus == "canceled";
+
+            bool isDelayed =
+                normalizedStatus.find("delay") != string::npos;
+
+            // Update the flight details
             flights[i].setAirline(airline);
             flights[i].setSource(source);
             flights[i].setDestination(destination);
@@ -187,6 +232,35 @@ void FlightManager::updateFlight()
             flights[i].setStatus(status);
 
             cout << "Flight updated successfully.\n";
+
+            // Generate the appropriate notification
+            if (isCancelled && !wasCancelled)
+            {
+                passengerManager.notifyFlightCancellation(
+                    flightNumber,
+                    notificationManager,
+                    "The flight has been cancelled."
+                );
+            }
+            else if (!isCancelled &&
+                     (statusChanged || departureChanged) &&
+                     isDelayed)
+            {
+                passengerManager.notifyFlightDelay(
+                    flightNumber,
+                    notificationManager,
+                    departureTime
+                );
+            }
+            else if (!isCancelled && statusChanged)
+            {
+                passengerManager.notifyFlightStatusUpdate(
+                    flightNumber,
+                    notificationManager,
+                    status
+                );
+            }
+
             return;
         }
     }
@@ -227,27 +301,40 @@ void FlightManager::deleteFlight()
     cout << "Flight not found.\n";
 }
 
-void FlightManager::cancelFlight()
+void FlightManager::cancelFlight(PassengerManager& passengerManager, NotificationManager& notificationManager)
 {
     if (size == 0)
     {
-        cout << "No flights available.\n"<<endl;
+        cout << "No flights available.\n";
         return;
     }
 
     string flightNumber;
 
-    cin.ignore();
     cout << "Enter Flight Number to cancel: ";
-    getline(cin,flightNumber);
+    getline(cin >> ws, flightNumber);
 
     for (int i = 0; i < size; i++)
     {
         if (flights[i].getFlightNumber() == flightNumber)
         {
+            // Avoid generating duplicate cancellation notifications
+            if (flights[i].getStatus() == "Cancelled")
+            {
+                cout << "This flight is already cancelled.\n";
+                return;
+            }
+
             flights[i].setStatus("Cancelled");
 
             cout << "Flight cancelled successfully.\n";
+
+            // Notify every registered passenger booked on this flight
+            passengerManager.notifyFlightCancellation(
+                flightNumber,
+                notificationManager
+            );
+
             return;
         }
     }
