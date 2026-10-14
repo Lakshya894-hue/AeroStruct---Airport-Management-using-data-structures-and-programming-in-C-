@@ -6,6 +6,7 @@
 class PassengerManager;
 class NotificationManager;
 class PassengerManager;
+class FlightManager;
 
 class BoardingQueue
 {
@@ -26,11 +27,14 @@ public:
     BoardingQueue();
     ~BoardingQueue();
 
-    void enqueue(PassengerManager& passengerManager, NotificationManager& notificationManager);
+    void enqueue(
+    PassengerManager& passengerManager, FlightManager& flightManager, NotificationManager& notificationManager);
     void dequeue(PassengerManager& passengerManager);
     void displayQueue();
 
     bool isEmpty() const;
+
+    int removePassengersByFlightNumber(const std::string& flightNumber);
 };
 
 #endif

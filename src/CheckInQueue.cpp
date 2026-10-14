@@ -2,6 +2,7 @@
 #include "PassengerManager.h"
 #include "NotificationManager.h"
 #include "PassengerManager.h"
+#include "FlightManager.h"
 #include <cctype>
 #include <iostream>
 
@@ -40,8 +41,7 @@ bool CheckInQueue::isEmpty() const
 
 // Enqueue Passenger
 // Enqueue a registered passenger and generate a check-in notification
-void CheckInQueue::enqueue(
-    PassengerManager& passengerManager,
+void CheckInQueue::enqueue(PassengerManager& passengerManager, FlightManager& flightManager,
     NotificationManager& notificationManager)
 {
     string id, name, gender, phone;
@@ -67,12 +67,32 @@ void CheckInQueue::enqueue(
     }
 
     // Retrieve details from Passenger Management
-    if (!passengerManager.getPassengerQueueDetails(
-            id, name, age, gender, phone, flight,
+    if (!passengerManager.getPassengerQueueDetails(id, name, age, gender, phone, flight,
             seat, assistance, status))
     {
         cout << "Passenger not found in Passenger Management.\n";
         cout << "Please register the passenger first.\n";
+        return;
+    }
+
+    // Check whether the passenger's flight is still available
+    string flightStatus;
+
+    if (!flightManager.getFlightStatus(flight, flightStatus))
+    {
+        cout << "Flight not found. Passenger cannot enter the queue.\n";
+        return;
+    }
+
+    // Normalize flight status for case-insensitive comparison
+    for (char& ch : flightStatus)
+    {
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+    }
+
+    if (flightStatus == "cancelled" || flightStatus == "canceled")
+    {
+        cout << "Check-in denied: this flight has been cancelled.\n";
         return;
     }
 
@@ -183,4 +203,41 @@ void CheckInQueue::displayQueue()
         current = current->next;
         position++;
     }
+}
+int CheckInQueue::removePassengersByFlightNumber(const std::string& flightNumber)
+{
+    Node* current = front;
+    Node* previous = nullptr;
+    int removedCount = 0;
+
+    while (current != nullptr)
+    {
+        if (current->data.getFlightNumber() == flightNumber)
+        {
+            Node* temp = current;
+            current = current->next;
+
+            if (previous == nullptr)
+                front = current;
+            else
+                previous->next = current;
+
+            if (temp == rear)
+                rear = previous;
+
+            delete temp;
+            size--;
+            removedCount++;
+        }
+        else
+        {
+            previous = current;
+            current = current->next;
+        }
+    }
+
+    if (front == nullptr)
+        rear = nullptr;
+
+    return removedCount;
 }

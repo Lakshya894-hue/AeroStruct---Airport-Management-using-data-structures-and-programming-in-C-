@@ -6,6 +6,8 @@
 
 class PassengerManager;
 class NotificationManager;
+class CheckInQueue;
+class BoardingQueue;
 class FlightManager
 {
 private:
@@ -20,12 +22,19 @@ public:
     void addFlight();
     void displayFlights();
     void searchFlight();
-    void updateFlight(PassengerManager& passengerManager, NotificationManager& notificationManager);
+    void updateFlight(
+    PassengerManager& passengerManager,NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue, BoardingQueue& boardingQueue);
     void deleteFlight();
-    void cancelFlight(PassengerManager& passengerManager, NotificationManager& notificationManager);
+    void cancelFlight(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue);
     void sortFlights();
     void suggestAlternativeFlights();
     bool flightExists(const std::string& flightNumber);
+    bool getFlightStatus(const std::string& flightNumber, std::string& status);
 };
 
 #endif

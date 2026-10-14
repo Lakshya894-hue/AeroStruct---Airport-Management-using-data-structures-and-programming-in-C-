@@ -14,8 +14,9 @@ using namespace std;
 
 
 // Flight Management Menu
-void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager,
-    NotificationManager& notificationManager)
+void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager, 
+    NotificationManager& notificationManager, CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue)
 {
     int choice;
 
@@ -49,7 +50,7 @@ void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager
                 break;
 
             case 4:
-                flightManager.updateFlight(passengerManager, notificationManager);
+                flightManager.updateFlight(passengerManager, notificationManager,checkInQueue,boardingQueue);
                 break;
 
             case 5:
@@ -57,7 +58,7 @@ void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager
                 break;
 
             case 6:
-                flightManager.cancelFlight(passengerManager, notificationManager);
+                flightManager.cancelFlight(passengerManager,notificationManager,checkInQueue,boardingQueue);
                 break;
 
             case 7:
@@ -145,7 +146,7 @@ void passengerMenu(
 
 
 // Check-In Menu
-void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager,
+void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager, FlightManager& flightManager,
     NotificationManager& notificationManager)
 {
     int choice;
@@ -163,7 +164,7 @@ void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager,
         switch (choice)
         {
             case 1:
-                checkInQueue.enqueue(passengerManager, notificationManager);
+                checkInQueue.enqueue(passengerManager, flightManager, notificationManager);
                 break;
 
             case 2:
@@ -187,7 +188,7 @@ void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager,
 
 
 // Boarding Menu
-void boardingMenu(BoardingQueue& boardingQueue,PassengerManager& passengerManager, 
+void boardingMenu(BoardingQueue& boardingQueue, PassengerManager& passengerManager, FlightManager& flightManager,
     NotificationManager& notificationManager)
 {
     int choice;
@@ -205,7 +206,7 @@ void boardingMenu(BoardingQueue& boardingQueue,PassengerManager& passengerManage
         switch (choice)
         {
             case 1:
-                boardingQueue.enqueue(passengerManager, notificationManager);
+                boardingQueue.enqueue(passengerManager, flightManager, notificationManager);
                 break;
 
             case 2:
@@ -513,19 +514,19 @@ int main()
         switch (choice)
         {
             case 1:
-                flightMenu(flightManager,passengerManager,notificationManager);
+                flightMenu(flightManager, passengerManager, notificationManager, checkInQueue, boardingQueue);
                 break;
 
             case 2:
-                passengerMenu(passengerManager, undoStack, flightManager);;
+                passengerMenu(passengerManager, undoStack, flightManager);
                 break;
 
             case 3:
-                checkInMenu(checkInQueue, passengerManager, notificationManager);
+                checkInMenu(checkInQueue, passengerManager, flightManager, notificationManager);
                 break;
 
             case 4:
-                boardingMenu(boardingQueue, passengerManager, notificationManager);
+                boardingMenu(boardingQueue, passengerManager, flightManager, notificationManager);
                 break;
 
             case 5:

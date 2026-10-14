@@ -3,6 +3,7 @@
 #include "FlightManager.h"
 #include "NotificationManager.h"
 #include <iostream>
+#include <cctype>
 
 using namespace std;
 
@@ -83,9 +84,32 @@ void PassengerManager::addPassenger(FlightManager& flightManager)
     cout << "Enter Flight Number: ";
     getline(cin >> ws, flight);
 
+    // Check whether the flight exists
     if (!flightManager.flightExists(flight))
     {
         cout << "Flight does not exist. Please add the flight first.\n";
+        return;
+    }
+
+    // Check whether the flight has been cancelled
+    string flightStatus;
+
+    if (!flightManager.getFlightStatus(flight, flightStatus))
+    {
+        cout << "Unable to retrieve flight status.\n";
+        return;
+    }
+
+    // Convert status to lowercase for case-insensitive comparison
+    for (char& ch : flightStatus)
+    {
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+    }
+
+    if (flightStatus == "cancelled" ||
+    flightStatus == "canceled")
+    {
+        cout << "Passenger registration denied: this flight has been cancelled.\n";
         return;
     }
 
@@ -228,9 +252,30 @@ void PassengerManager::updatePassenger(FlightManager& flightManager)
             cout << "Enter Flight Number: ";
             getline(cin >> ws, flight);
 
+            // Validate that the flight exists
             if (!flightManager.flightExists(flight))
             {
                 cout << "Flight does not exist. Update cancelled.\n";
+                return;
+            }
+
+            // Reject cancelled flights      
+            string flightStatus;
+
+            if (!flightManager.getFlightStatus(flight, flightStatus))
+            {
+                cout << "Unable to retrieve flight status. Update cancelled.\n";
+                return;
+            }
+
+            for (char& ch : flightStatus)
+            {
+                ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+            }
+
+            if (flightStatus == "cancelled" || flightStatus == "canceled")
+            {
+                cout << "Update denied: passengers cannot be assigned to a cancelled flight.\n";
                 return;
             }
 

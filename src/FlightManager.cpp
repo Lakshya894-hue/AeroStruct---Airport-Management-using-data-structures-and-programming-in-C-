@@ -2,6 +2,8 @@
 #include "SmartFlightSuggestion.h"
 #include "PassengerManager.h"
 #include "NotificationManager.h"
+#include "CheckInQueue.h"
+#include "BoardingQueue.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -137,9 +139,9 @@ bool FlightManager::flightExists(const std::string& flightNumber)
     return false;
 }
 
-void FlightManager::updateFlight(
-    PassengerManager& passengerManager,
-    NotificationManager& notificationManager)
+void FlightManager::updateFlight(PassengerManager& passengerManager,
+    NotificationManager& notificationManager,CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue)
 {
     if (size == 0)
     {
@@ -236,29 +238,25 @@ void FlightManager::updateFlight(
             // Generate the appropriate notification
             if (isCancelled && !wasCancelled)
             {
-                passengerManager.notifyFlightCancellation(
-                    flightNumber,
-                    notificationManager,
-                    "The flight has been cancelled."
-                );
+                // Notify all passengers booked on this flight
+                passengerManager.notifyFlightCancellation(flightNumber, notificationManager,"The flight has been cancelled.");
+
+                // Remove affected passengers from both queues
+                int checkInRemoved = checkInQueue.removePassengersByFlightNumber(flightNumber);
+
+                int boardingRemoved = boardingQueue.removePassengersByFlightNumber(flightNumber);
+
+                cout << "Passengers removed from Check-In Queue: "<< checkInRemoved << "\n";
+
+                cout << "Passengers removed from Boarding Queue: "<< boardingRemoved << "\n";
             }
-            else if (!isCancelled &&
-                     (statusChanged || departureChanged) &&
-                     isDelayed)
+            else if (!isCancelled &&(statusChanged || departureChanged) &&isDelayed)
             {
-                passengerManager.notifyFlightDelay(
-                    flightNumber,
-                    notificationManager,
-                    departureTime
-                );
+                passengerManager.notifyFlightDelay(flightNumber,notificationManager, departureTime);
             }
             else if (!isCancelled && statusChanged)
             {
-                passengerManager.notifyFlightStatusUpdate(
-                    flightNumber,
-                    notificationManager,
-                    status
-                );
+                passengerManager.notifyFlightStatusUpdate(flightNumber,notificationManager,status);
             }
 
             return;
@@ -301,7 +299,9 @@ void FlightManager::deleteFlight()
     cout << "Flight not found.\n";
 }
 
-void FlightManager::cancelFlight(PassengerManager& passengerManager, NotificationManager& notificationManager)
+void FlightManager::cancelFlight(PassengerManager& passengerManager,NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue)
 {
     if (size == 0)
     {
@@ -318,28 +318,58 @@ void FlightManager::cancelFlight(PassengerManager& passengerManager, Notificatio
     {
         if (flights[i].getFlightNumber() == flightNumber)
         {
-            // Avoid generating duplicate cancellation notifications
+            // Prevent duplicate cancellation
             if (flights[i].getStatus() == "Cancelled")
             {
                 cout << "This flight is already cancelled.\n";
                 return;
             }
 
+            // Update flight status
             flights[i].setStatus("Cancelled");
 
             cout << "Flight cancelled successfully.\n";
 
-            // Notify every registered passenger booked on this flight
+            // Notify passengers booked on this flight
             passengerManager.notifyFlightCancellation(
                 flightNumber,
-                notificationManager
-            );
+                notificationManager);
+
+            // Remove affected passengers from both queues
+            int checkInRemoved =
+                checkInQueue.removePassengersByFlightNumber(
+                    flightNumber);
+
+            int boardingRemoved =
+                boardingQueue.removePassengersByFlightNumber(
+                    flightNumber);
+
+            cout << "Passengers removed from Check-In Queue: "
+                 << checkInRemoved << "\n";
+
+            cout << "Passengers removed from Boarding Queue: "
+                 << boardingRemoved << "\n";
 
             return;
         }
     }
 
     cout << "Flight not found.\n";
+}
+
+// Retrieve the status of a flight using its flight number
+bool FlightManager::getFlightStatus(const std::string& flightNumber, std::string& status)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            status = flights[i].getStatus();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void FlightManager::sortFlights()

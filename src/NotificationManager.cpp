@@ -147,9 +147,7 @@ void NotificationManager::sendBoardingReminder(
                     NotificationType::BoardingReminder, message);
 }
 
-void NotificationManager::notifyGateChange(
-    const string& passengerId,
-    const string& passengerName,
+void NotificationManager::notifyGateChange(const string& passengerId,const string& passengerName,
     const string& flightNumber,
     const string& oldGate,
     const string& newGate)
@@ -169,9 +167,7 @@ void NotificationManager::notifyGateChange(
                     NotificationType::GateChange, message);
 }
 
-void NotificationManager::notifyFlightStatus(
-    const string& passengerId,
-    const string& passengerName,
+void NotificationManager::notifyFlightStatus(const string& passengerId,const string& passengerName,
     const string& flightNumber,
     const string& status)
 {
