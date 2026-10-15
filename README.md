@@ -47,9 +47,9 @@ Structures, Algorithms, OOP concepts and database management.
 
 | Name | Role | Major Contribution |
 |---|---|---|
-| Lakshya Sharma | Project Lead | Project planning, architecture, Flight Management, system integration,Stacks for undo operations, OOPS concept combine|
-| Kuber Dhoundiyal | Developer | Passenger Management, Linked List, Queue, Check-in and Boarding |
-| Arihant Singh | Database & Testing | MySQL, Priority Queue, Searching, Sorting, Graph algorithms and Testing |
+| Lakshya Sharma | Project Lead | Project planning, architecture, Flight Management, Graph, system integration,Stacks for undo operations, OOPS concept combine|
+| Kuber Dhoundiyal | Developer | Passenger Management, Linked List, Queue, OOPS concept combine,Check-in and Boarding |
+| Arihant Singh | Database & Testing | MySQL, Priority Queue, Stacks for undo operations, Searching, Sorting, Graph algorithms and Testing |
 
 ---
 
