@@ -14,6 +14,10 @@ struct SmartFlightOption
     std::string departureTime;
     std::string arrivalTime;
     std::string status;
+
+    double fare;
+    int durationMinutes;
+    double recommendationScore;
 };
 
 class SmartFlightSuggestion
