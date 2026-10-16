@@ -10,14 +10,15 @@
 class NotificationManager
 {
 private:
-    enum class NotificationType
+    enum class NotificationType //enum conatins named set of fixed values
     {
         CheckInReminder,
         BoardingReminder,
         GateChange,
         FlightStatus,
         Delay,
-        Cancellation
+        Cancellation,
+        ConnectionRisk
     };
 
     struct Node
@@ -31,10 +32,7 @@ private:
         bool isRead;
         Node* next;
 
-        Node(int id,
-             const std::string& pId,
-             const std::string& pName,
-             const std::string& fNumber,
+        Node(int id,const std::string& pId,const std::string& pName,const std::string& fNumber,
              NotificationType notificationType,
              const std::string& notificationMessage);
     };
@@ -51,8 +49,7 @@ private:
                          const std::string& message);
 
     static std::string getTypeName(NotificationType type);
-    static bool hasRequiredDetails(const std::string& passengerId,
-                                   const std::string& passengerName,
+    static bool hasRequiredDetails(const std::string& passengerId,const std::string& passengerName,
                                    const std::string& flightNumber);
 
 public:
@@ -60,18 +57,14 @@ public:
     ~NotificationManager();
 
     // Personalized journey notifications
-    void sendCheckInReminder(const std::string& passengerId,
-                             const std::string& passengerName,
-                             const std::string& flightNumber);
+    void sendCheckInReminder(const std::string& passengerId,const std::string& passengerName,
+                            const std::string& flightNumber);
 
-    void sendBoardingReminder(const std::string& passengerId,
-                              const std::string& passengerName,
+    void sendBoardingReminder(const std::string& passengerId,const std::string& passengerName,
                               const std::string& flightNumber,
                               const std::string& gate);
 
-    void notifyGateChange(const std::string& passengerId,
-                          const std::string& passengerName,
-                          const std::string& flightNumber,
+    void notifyGateChange(const std::string& passengerId,const std::string& passengerName,const std::string& flightNumber,
                           const std::string& oldGate,
                           const std::string& newGate);
 
@@ -90,6 +83,16 @@ public:
                             const std::string& passengerName,
                             const std::string& flightNumber,
                             const std::string& reason = "The flight has been cancelled");
+    // Detect a tight connection and notify the passenger if risky.
+    bool notifyConnectionRisk(
+    const std::string& passengerId,
+    const std::string& passengerName,
+    const std::string& arrivingFlightNumber,
+    const std::string& arrivalTime,
+    int transferMinutes,
+    const std::string& connectingFlightNumber,
+    const std::string& nextDepartureTime,
+    int minimumBufferMinutes = 30);
 
     // Notification history and read/unread handling
     void displayPassengerNotifications(const std::string& passengerId) const;
