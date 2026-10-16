@@ -104,9 +104,9 @@ void CheckInQueue::enqueue(PassengerManager& passengerManager, FlightManager& fl
         ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     }
 
-    if (normalizedStatus == "checked-in" ||normalizedStatus == "checked in" ||normalizedStatus == "boarded")
+    if (normalizedStatus != "registered")
     {
-        cout << "Passenger has already checked in or boarded.\n";
+        cout << "Only registered passengers can enter "<< "the check-in queue.\n";
         return;
     }
 
@@ -130,8 +130,7 @@ void CheckInQueue::enqueue(PassengerManager& passengerManager, FlightManager& fl
     cout << "\nPassenger added to check-in queue successfully.\n";
 
     // Create the personalized check-in notification
-    notificationManager.sendCheckInReminder(
-        id, name, flight);
+    notificationManager.sendCheckInReminder(id, name, flight);
 }
 // Dequeue Passenger
 void CheckInQueue::dequeue(PassengerManager& passengerManager)
@@ -151,8 +150,7 @@ void CheckInQueue::dequeue(PassengerManager& passengerManager)
     string passengerId = temp->data.getPassengerId();
 
     // Update the original passenger record
-    bool updated = passengerManager.updatePassengerStatus(
-        passengerId, "Checked-In");
+    bool updated = passengerManager.updatePassengerStatus(passengerId, "Checked-In");
 
     // Remove passenger from the queue
     front = front->next;
