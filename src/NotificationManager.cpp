@@ -1,10 +1,47 @@
 #include "NotificationManager.h"
 #include <iostream>
+#include <cctype>
 
 using namespace std;
+namespace
+{
+    // Convert a valid HH:MM time into minutes after midnight.
+    bool parseTimeToMinutes(const string& time,int& totalMinutes)
+    {
+        if (time.size() != 5 || time[2] != ':') // Accepts time in five characters in HH:MM format.
+        {
+            return false;
+        }
 
+        for (int i = 0; i < 5; i++)
+        {
+            if (i == 2) // check for ':' 
+                continue; 
+
+            if (!isdigit(static_cast<unsigned char>(time[i]))) //check for digits
+            {
+                return false;
+            }
+        }
+
+        int hours =
+            (time[0] - '0') * 10 + (time[1] - '0');
+
+        int minutes =
+            (time[3] - '0') * 10 + (time[4] - '0');
+
+        if (hours > 23 || minutes > 59)
+        {
+            return false;
+        }
+
+        totalMinutes = hours * 60 + minutes; //convert in minutes
+
+        return true;
+    }
+}
 NotificationManager::Node::Node(
-    int id,
+    int id, 
     const string& pId,
     const string& pName,
     const string& fNumber,
@@ -18,8 +55,7 @@ NotificationManager::Node::Node(
       message(notificationMessage),
       isRead(false),
       next(nullptr)
-{
-}
+{}
 
 NotificationManager::NotificationManager()
 {
@@ -29,7 +65,7 @@ NotificationManager::NotificationManager()
     nextNotificationId = 1;
 }
 
-NotificationManager::~NotificationManager()
+NotificationManager::~NotificationManager() //destructor
 {
     Node* current = head;
 
@@ -68,8 +104,7 @@ void NotificationManager::addNotification(
         return;
     }
 
-    Node* newNode = new Node(nextNotificationId++, passengerId,
-                             passengerName, flightNumber, type, message);
+    Node* newNode = new Node(nextNotificationId++, passengerId,passengerName, flightNumber, type, message);
 
     if (head == nullptr)
     {
@@ -87,11 +122,11 @@ void NotificationManager::addNotification(
     cout << "\n[Notification Created]\n";
     cout << "To      : " << passengerName << " (ID: " << passengerId << ")\n";
     cout << "Flight  : " << flightNumber << "\n";
-    cout << "Type    : " << getTypeName(type) << "\n";
+    cout << "Type    : " << getTypeName(type) << "\n"; // converted to human readable
     cout << "Message : " << message << "\n";
 }
 
-string NotificationManager::getTypeName(NotificationType type)
+string NotificationManager::getTypeName(NotificationType type) //enum class 
 {
     switch (type)
     {
@@ -107,6 +142,8 @@ string NotificationManager::getTypeName(NotificationType type)
             return "Delay Alert";
         case NotificationType::Cancellation:
             return "Cancellation Alert";
+        case NotificationType::ConnectionRisk:
+            return "Connection Risk Alert";
         default:
             return "General Notification";
     }
@@ -115,7 +152,7 @@ string NotificationManager::getTypeName(NotificationType type)
 void NotificationManager::sendCheckInReminder(
     const string& passengerId,
     const string& passengerName,
-    const string& flightNumber)
+    const string& flightNumber) //receives details
 {
     const string message = "Hello " + passengerName +
         ", check-in is open for flight " + flightNumber +
@@ -161,10 +198,9 @@ void NotificationManager::notifyGateChange(const string& passengerId,const strin
     string message = "Hello " + passengerName + ", the gate for flight " +
                      flightNumber + " has changed from " +
                      (oldGate.empty() ? string("unassigned") : oldGate) +
-                     " to " + newGate + ". Please proceed to the updated gate.";
+                     " to " + newGate + ". Please proceed to the updated gate.";//conditional operator
 
-    addNotification(passengerId, passengerName, flightNumber,
-                    NotificationType::GateChange, message);
+    addNotification(passengerId, passengerName, flightNumber,NotificationType::GateChange, message);
 }
 
 void NotificationManager::notifyFlightStatus(const string& passengerId,const string& passengerName,
@@ -180,8 +216,7 @@ void NotificationManager::notifyFlightStatus(const string& passengerId,const str
     string message = "Hello " + passengerName + ", the current status of flight " +
                      flightNumber + " is: " + status + ".";
 
-    addNotification(passengerId, passengerName, flightNumber,
-                    NotificationType::FlightStatus, message);
+    addNotification(passengerId, passengerName, flightNumber,NotificationType::FlightStatus, message);
 }
 
 void NotificationManager::notifyDelay(
@@ -206,8 +241,7 @@ void NotificationManager::notifyDelay(
 
     message += " Please follow airport announcements for further updates.";
 
-    addNotification(passengerId, passengerName, flightNumber,
-                    NotificationType::Delay, message);
+    addNotification(passengerId, passengerName, flightNumber,NotificationType::Delay, message);
 }
 
 void NotificationManager::notifyCancellation(
@@ -230,8 +264,109 @@ void NotificationManager::notifyCancellation(
                     NotificationType::Cancellation, message);
 }
 
-void NotificationManager::displayPassengerNotifications(
-    const string& passengerId) const
+
+bool NotificationManager::notifyConnectionRisk(
+    const string& passengerId,
+    const string& passengerName,
+    const string& arrivingFlightNumber,
+    const string& arrivalTime,
+    int transferMinutes,
+    const string& connectingFlightNumber,
+    const string& nextDepartureTime,
+    int minimumBufferMinutes)
+{
+    // Step 1: Validate required passenger and flight details.
+    if (!hasRequiredDetails(passengerId, passengerName, arrivingFlightNumber) ||
+        connectingFlightNumber.empty())
+    {
+        cout << "Connection-risk check failed: "
+             << "passenger details and both flight numbers are required.\n";
+        return false;
+    }
+
+    // Step 2: Validate transfer duration and configured threshold.
+    if (transferMinutes < 0 || minimumBufferMinutes < 0)//estimated time needed to transfer between flights.
+    {
+        cout << "Connection-risk check failed: "
+             << "transfer time and minimum buffer cannot be negative.\n";
+        return false;
+    }
+
+    // Step 3: Convert both clock times into minutes.
+    int arrivalMinutes;
+    int departureMinutes;
+
+    if (!parseTimeToMinutes(arrivalTime, arrivalMinutes) ||
+        !parseTimeToMinutes(nextDepartureTime, departureMinutes))
+    {
+        cout << "Connection-risk check failed: "
+             << "times must use valid HH:MM format.\n";
+        return false;
+    }
+
+    // Step 4: Treat an earlier next-departure clock time
+    // as a departure on the following day.
+    if (departureMinutes < arrivalMinutes)
+    {
+        departureMinutes += 24 * 60; //midnight departure
+    }
+
+    // Step 5: Calculate when the passenger finishes transferring.
+    const long long transferCompleteMinutes =
+        static_cast<long long>(arrivalMinutes) + transferMinutes;
+
+    // Step 6: Calculate the remaining buffer before departure.
+    const long long availableBufferMinutes =
+        static_cast<long long>(departureMinutes) -
+        transferCompleteMinutes;
+
+    // Step 7: No alert is needed if the buffer meets the threshold.
+    if (availableBufferMinutes >= minimumBufferMinutes)
+    {
+        cout << "\n[Connection Check]\n";
+        cout << "No connection-risk alert is required.\n";
+        cout << "Available buffer after transfer: "
+             << availableBufferMinutes << " minute(s).\n";
+
+        return false;
+    }
+
+    // Step 8: Construct the personalized risk message.
+    string message =
+        "Hello " + passengerName +
+        ", a tight connection has been detected between arriving flight " +
+        arrivingFlightNumber +
+        " and connecting flight " + connectingFlightNumber + ".";
+
+    message += " Arrival time: " + arrivalTime + ".";
+    message += " Estimated transfer time: " +
+               to_string(transferMinutes) + " minute(s).";
+    message += " Next departure: " + nextDepartureTime + ".";
+
+    if (availableBufferMinutes < 0)
+    {
+        message += " The estimated transfer would finish " + to_string(-availableBufferMinutes) +
+                   " minute(s) after the scheduled departure time.";
+    }
+    else
+    {
+        message += " Only " + to_string(availableBufferMinutes) +
+                   " minute(s) remain after the estimated transfer.";
+    }
+
+    message += " Minimum required buffer: " +
+               to_string(minimumBufferMinutes) + " minute(s).";
+
+    message +=
+        " Please contact the airline or service desk for connection assistance.";
+
+    // Step 9: Store the notification against the connecting flight.
+    addNotification(passengerId,passengerName,connectingFlightNumber,NotificationType::ConnectionRisk,message);
+
+    return true;
+}
+
+void NotificationManager::displayPassengerNotifications(const string& passengerId) const
 {
     if (passengerId.empty())
     {
@@ -292,8 +427,7 @@ void NotificationManager::displayAllNotifications() const
     }
 }
 
-void NotificationManager::displayUnreadNotifications(
-    const string& passengerId) const
+void NotificationManager::displayUnreadNotifications(const string& passengerId) const
 {
     if (passengerId.empty())
     {
@@ -326,8 +460,7 @@ void NotificationManager::displayUnreadNotifications(
     }
 }
 
-void NotificationManager::markPassengerNotificationsRead(
-    const string& passengerId)
+void NotificationManager::markPassengerNotificationsRead(const string& passengerId)
 {
     if (passengerId.empty())
     {
@@ -351,13 +484,11 @@ void NotificationManager::markPassengerNotificationsRead(
 
     if (markedCount == 0)
     {
-        cout << "No unread notifications to mark for passenger ID "
-             << passengerId << ".\n";
+        cout << "No unread notifications to mark for passenger ID "<< passengerId << ".\n";
     }
     else
     {
-        cout << markedCount << " notification(s) marked as read for passenger ID "
-             << passengerId << ".\n";
+        cout << markedCount << " notification(s) marked as read for passenger ID "<< passengerId << ".\n";
     }
 }
 
