@@ -35,6 +35,9 @@ public:
     bool isEmpty() const;
 
     int removePassengersByFlightNumber(const std::string& flightNumber);
+    void enqueuePassengerById(const std::string& id,PassengerManager& passengerManager,
+    FlightManager& flightManager,
+    NotificationManager& notificationManager);
 };
 
 #endif
