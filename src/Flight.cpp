@@ -13,9 +13,11 @@ Flight::Flight()
     departureTime = "";
     arrivalTime = "";
     status = "Scheduled";
+    fare = 0.0;
 }
 
-Flight::Flight(string fno, string air, string src, string dest, string dep, string arr, string stat)
+Flight::Flight(string fno, string air, string src, string dest, string dep, 
+               string arr, string stat, double amount)
 {
     flightNumber = fno;
     airline = air;
@@ -24,8 +26,8 @@ Flight::Flight(string fno, string air, string src, string dest, string dep, stri
     departureTime = dep;
     arrivalTime = arr;
     status = stat;
+    fare = amount;
 }
-
 void Flight::display()
 {
     cout << endl;
@@ -36,6 +38,7 @@ void Flight::display()
     cout << "Departure     : " << departureTime << endl;
     cout << "Arrival       : " << arrivalTime << endl;
     cout << "Status        : " << status << endl;
+    cout << "Ticket Fare   : Rs. " << fare << endl;
 }
 
 string Flight::getFlightNumber()
@@ -73,6 +76,11 @@ string Flight::getStatus()
     return status;
 }
 
+double Flight::getFare()
+{
+    return fare;
+}
+
 void Flight::setAirline(string air)
 {
     airline = air;
@@ -108,6 +116,11 @@ void Flight::setStatus(string stat)
     status = stat;
 }
 
+void Flight::setFare(double amount)
+{
+    fare = amount;
+}
+
 void Flight::swapFlight(Flight &other)
 {
     swap(flightNumber, other.flightNumber);
@@ -117,4 +130,5 @@ void Flight::swapFlight(Flight &other)
     swap(departureTime, other.departureTime);
     swap(arrivalTime, other.arrivalTime);
     swap(status, other.status);
+    swap(fare, other.fare);
 }
