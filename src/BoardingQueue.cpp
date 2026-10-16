@@ -3,6 +3,7 @@
 #include "NotificationManager.h"
 #include "FlightManager.h"
 #include <iostream>
+#include <cctype>
 
 using namespace std;
 
@@ -32,18 +33,33 @@ bool BoardingQueue::isEmpty() const
 }
 
 // Enqueue a registered passenger and generate a boarding reminder
-void BoardingQueue::enqueue(PassengerManager& passengerManager, FlightManager& flightManager,
+// Normal method: ask for a passenger ID.
+void BoardingQueue::enqueue(
+    PassengerManager& passengerManager,
+    FlightManager& flightManager,
     NotificationManager& notificationManager)
 {
-    string id, name, gender, phone;
+    string id;
+
+    cout << "\n========== Boarding Queue ==========\n";
+    cout << "Enter Passenger ID: ";
+    getline(cin >> ws, id);
+
+    enqueuePassengerById(
+        id, passengerManager, flightManager, notificationManager);
+}
+
+
+// Add a specific passenger without asking for their ID again.
+void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& passengerManager,
+    FlightManager& flightManager,
+    NotificationManager& notificationManager)
+{
+    string name, gender, phone;
     string flight, seat, assistance, status, gate;
     int age;
 
-    cout << "\n========== Boarding Queue ==========\n";
-    cout << "Enter Registered Passenger ID: ";
-    getline(cin >> ws, id);
-
-    // Prevent duplicate entries in the boarding queue
+    // 1. Prevent duplicate entries.
     Node* current = front;
 
     while (current != nullptr)
@@ -57,37 +73,37 @@ void BoardingQueue::enqueue(PassengerManager& passengerManager, FlightManager& f
         current = current->next;
     }
 
-    // Retrieve details from Passenger Management
+    // 2. Retrieve the passenger's latest record.
     if (!passengerManager.getPassengerQueueDetails(
-            id, name, age, gender, phone, flight,
-            seat, assistance, status))
+            id, name, age, gender, phone,
+            flight, seat, assistance, status))
     {
-        cout << "Passenger not found in Passenger Management.\n";
-        cout << "Please register the passenger first.\n";
+        cout << "Passenger not found.\n";
         return;
     }
-    // Verify that the passenger's flight exists
+
+    // 3. Verify that the flight exists.
     string flightStatus;
 
     if (!flightManager.getFlightStatus(flight, flightStatus))
     {
-        cout << "Flight not found. Passenger cannot enter the queue.\n";
+        cout << "Boarding denied: flight not found.\n";
         return;
     }
 
-    // Normalize status before checking cancellation
+    // Normalize flight status.
     for (char& ch : flightStatus)
     {
         ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     }
 
-     if (flightStatus == "cancelled" ||
-    flightStatus == "canceled")
+    if (flightStatus == "cancelled" ||flightStatus == "canceled")
     {
-        cout << "Boarding denied: this flight has been cancelled.\n";
+        cout << "Boarding denied: flight is cancelled.\n";
         return;
     }
-    // Only checked-in passengers can enter the boarding queue
+
+    // 4. Only security-cleared passengers may enter.
     string normalizedStatus = status;
 
     for (char& ch : normalizedStatus)
@@ -95,16 +111,19 @@ void BoardingQueue::enqueue(PassengerManager& passengerManager, FlightManager& f
         ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     }
 
-    if (normalizedStatus != "checked-in" &&normalizedStatus != "checked in")
+    if (normalizedStatus != "security-cleared" &&
+        normalizedStatus != "security cleared")
     {
-        cout << "Boarding denied: passenger must complete check-in first.\n";
-        cout << "Current passenger status: " << status << "\n";
+        cout << "Boarding denied: security clearance is required.\n";
+        cout << "Current status: " << status << "\n";
         return;
     }
 
+    // 5. Obtain the boarding gate.
     cout << "Enter Boarding Gate: ";
     getline(cin >> ws, gate);
 
+    // 6. Add passenger to the linked-list queue.
     Passenger passenger(
         id, name, age, gender, phone,
         flight, seat, assistance, status);
@@ -113,8 +132,7 @@ void BoardingQueue::enqueue(PassengerManager& passengerManager, FlightManager& f
 
     if (front == nullptr)
     {
-        front = newNode;
-        rear = newNode;
+        front = rear = newNode;
     }
     else
     {
@@ -124,10 +142,11 @@ void BoardingQueue::enqueue(PassengerManager& passengerManager, FlightManager& f
 
     size++;
 
-    cout << "Passenger added to boarding queue successfully.\n";
+    cout << "\nPassenger added to boarding queue successfully.\n";
 
-    // Create the personalized boarding notification
-    notificationManager.sendBoardingReminder(id, name, flight, gate);
+    // 7. Send the boarding reminder.
+    notificationManager.sendBoardingReminder(
+        id, name, flight, gate);
 }
 
 void BoardingQueue::dequeue(PassengerManager& passengerManager)
@@ -199,8 +218,7 @@ void BoardingQueue::displayQueue()
         position++;
     }
 }
-int BoardingQueue::removePassengersByFlightNumber(
-    const std::string& flightNumber)
+int BoardingQueue::removePassengersByFlightNumber(const std::string& flightNumber)
 {
     Node* current = front;
     Node* previous = nullptr;
@@ -214,12 +232,12 @@ int BoardingQueue::removePassengersByFlightNumber(
             current = current->next;
 
             if (previous == nullptr)
-                front = current;
+                front = current;    //case for first node
             else
-                previous->next = current;
+                previous->next = current; //case for middle or last node
 
             if (temp == rear)
-                rear = previous;
+                rear = previous; //updating rear
 
             delete temp;
             size--;
