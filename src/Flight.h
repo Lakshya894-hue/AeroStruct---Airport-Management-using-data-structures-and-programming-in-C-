@@ -14,12 +14,14 @@ private:
     string departureTime;
     string arrivalTime;
     string status;
+    double fare;
 
 public:
     Flight();
 
     Flight(string fno, string air, string src, string dest,
-           string dep, string arr, string stat);
+           string dep, string arr, string stat,
+           double amount = 0.0);
 
     void display();
 
@@ -30,6 +32,7 @@ public:
     string getDepartureTime();
     string getArrivalTime();
     string getStatus();
+    double getFare();
 
     void setFlightNumber(string fno);
     void setAirline(string air);
@@ -38,6 +41,7 @@ public:
     void setDepartureTime(string dep);
     void setArrivalTime(string arr);
     void setStatus(string stat);
+    void setFare(double amount);
 
     void swapFlight(Flight &other);
 };
