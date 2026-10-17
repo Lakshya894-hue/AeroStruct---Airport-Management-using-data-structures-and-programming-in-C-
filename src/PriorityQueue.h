@@ -2,7 +2,11 @@
 #define PRIORITYQUEUE_H
 
 #include "Passenger.h"
+#include <string>
 #include <cstddef>
+
+class PassengerManager;
+class FlightManager;
 
 class PriorityQueue
 {
@@ -14,7 +18,7 @@ private:
         Node* next;
 
         Node(const Passenger& p, int pr)
-            : passenger(p), priority(pr), next(nullptr){}
+            : passenger(p), priority(pr), next(nullptr) {}
     };
 
     Node* front;
@@ -24,11 +28,15 @@ public:
     PriorityQueue();
     ~PriorityQueue();
 
-    void enqueue();
+    void enqueue(
+        PassengerManager& passengerManager,
+        FlightManager& flightManager);
+
     void dequeue();
     void displayQueue();
 
     bool isEmpty() const;
+    int removePassengersByFlightNumber(const std::string& flightNumber);
 };
 
 #endif
