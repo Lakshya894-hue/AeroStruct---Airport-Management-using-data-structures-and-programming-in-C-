@@ -4,6 +4,7 @@
 #include "Flight.h"
 #include <string>
 
+class PriorityQueue;
 class PassengerManager;
 class NotificationManager;
 class CheckInQueue;
@@ -22,15 +23,16 @@ public:
     void addFlight();
     void displayFlights();
     void searchFlight();
-    void updateFlight(
-    PassengerManager& passengerManager,NotificationManager& notificationManager,
-    CheckInQueue& checkInQueue, BoardingQueue& boardingQueue);
+    void updateFlight(PassengerManager& passengerManager,NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue);
     void deleteFlight();
-    void cancelFlight(
-    PassengerManager& passengerManager,
+    void cancelFlight(PassengerManager& passengerManager,
     NotificationManager& notificationManager,
     CheckInQueue& checkInQueue,
-    BoardingQueue& boardingQueue);
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue);
     void sortFlights();
     void suggestAlternativeFlights();
     bool flightExists(const std::string& flightNumber);
