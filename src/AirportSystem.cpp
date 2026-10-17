@@ -1,5 +1,11 @@
 #include "AirportSystem.h"
 
+AirportSystem::AirportSystem()
+{
+    notificationManager.setFlightManager(flightManager);
+    notificationManager.setPassengerManager(passengerManager);
+}
+
 FlightManager& AirportSystem::getFlightManager()
 {
     return flightManager;
@@ -33,4 +39,8 @@ UndoStack& AirportSystem::getUndoStack()
 NotificationManager& AirportSystem::getNotificationManager()
 {
     return notificationManager;
+}
+GroupTravelManager& AirportSystem::getGroupTravelManager()
+{
+    return groupTravelManager;
 }
