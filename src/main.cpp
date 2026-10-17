@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <string>
+#include <cctype>
 #include "FlightManager.h"
 #include "PassengerManager.h"
 #include "CheckInQueue.h"
@@ -14,9 +15,13 @@ using namespace std;
 
 
 // Flight Management Menu
-void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager, 
-    NotificationManager& notificationManager, CheckInQueue& checkInQueue,
-    BoardingQueue& boardingQueue)
+void flightMenu(
+    FlightManager& flightManager,
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue)
 {
     int choice;
 
@@ -50,7 +55,8 @@ void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager
                 break;
 
             case 4:
-                flightManager.updateFlight(passengerManager, notificationManager,checkInQueue,boardingQueue);
+                flightManager.updateFlight(passengerManager, notificationManager, checkInQueue,
+                boardingQueue, priorityQueue);
                 break;
 
             case 5:
@@ -58,7 +64,7 @@ void flightMenu(FlightManager& flightManager, PassengerManager& passengerManager
                 break;
 
             case 6:
-                flightManager.cancelFlight(passengerManager,notificationManager,checkInQueue,boardingQueue);
+                flightManager.cancelFlight(passengerManager,notificationManager,checkInQueue,boardingQueue, priorityQueue);
                 break;
 
             case 7:
@@ -186,6 +192,60 @@ void checkInMenu(CheckInQueue& checkInQueue, PassengerManager& passengerManager,
     } while (choice != 0);
 }
 
+// Mark a checked-in passenger as security-cleared
+void markPassengerSecurityCleared(
+    PassengerManager& passengerManager)
+{
+    string id, name, gender, phone;
+    string flight, seat, assistance, status;
+    int age;
+
+    cout << "\n========== Security Clearance ==========\n";
+    cout << "Enter Passenger ID: ";
+    getline(cin >> ws, id);
+
+    // Retrieve the passenger's current details.
+    if (!passengerManager.getPassengerQueueDetails(
+            id, name, age, gender, phone,
+            flight, seat, assistance, status))
+    {
+        cout << "Passenger not found.\n";
+        return;
+    }
+
+    // Normalize the current passenger status.
+    string normalizedStatus = status;
+
+    for (char& ch : normalizedStatus)
+    {
+        ch = static_cast<char>(
+            tolower(static_cast<unsigned char>(ch)));
+    }
+
+    // Security clearance is allowed only after check-in.
+    if (normalizedStatus != "checked-in" &&
+        normalizedStatus != "checked in")
+    {
+        cout << "Security clearance denied.\n";
+        cout << "Passenger must complete check-in first.\n";
+        cout << "Current status: " << status << "\n";
+        return;
+    }
+
+    // Update the original passenger record.
+    bool updated = passengerManager.updatePassengerStatus(
+        id, "Security-Cleared");
+
+    if (updated)
+    {
+        cout << "\nSecurity clearance completed successfully.\n";
+        cout << "Passenger status updated to Security-Cleared.\n";
+    }
+    else
+    {
+        cout << "Failed to update passenger status.\n";
+    }
+}
 
 // Boarding Menu
 void boardingMenu(BoardingQueue& boardingQueue, PassengerManager& passengerManager, FlightManager& flightManager,
@@ -196,9 +256,10 @@ void boardingMenu(BoardingQueue& boardingQueue, PassengerManager& passengerManag
     do
     {
         cout << "\n========== Boarding Management ==========\n";
-        cout << "1. Add Passenger to Queue\n";
-        cout << "2. Display Queue\n";
-        cout << "3. Board Passenger\n";
+        cout << "1. Mark Passenger boarding cleared\n";
+        cout << "2. Add Passenger to Queue\n";
+        cout << "3. Display Queue\n";
+        cout << "4. Board Passenger\n";
         cout << "0. Back\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -206,14 +267,17 @@ void boardingMenu(BoardingQueue& boardingQueue, PassengerManager& passengerManag
         switch (choice)
         {
             case 1:
+                markPassengerSecurityCleared(passengerManager);
+                break;
+            case 2:
                 boardingQueue.enqueue(passengerManager, flightManager, notificationManager);
                 break;
 
-            case 2:
+            case 3:
                 boardingQueue.displayQueue();
                 break;
 
-            case 3:
+            case 4:
                 boardingQueue.dequeue(passengerManager);
                 break;
 
@@ -230,7 +294,9 @@ void boardingMenu(BoardingQueue& boardingQueue, PassengerManager& passengerManag
 
 
 // Priority Assistance Menu
-void priorityMenu(PriorityQueue& priorityQueue)
+void priorityMenu(PriorityQueue& priorityQueue,
+    PassengerManager& passengerManager,
+    FlightManager& flightManager)
 {
     int choice;
 
@@ -247,7 +313,7 @@ void priorityMenu(PriorityQueue& priorityQueue)
         switch (choice)
         {
             case 1:
-                priorityQueue.enqueue();
+                priorityQueue.enqueue(passengerManager, flightManager);
                 break;
 
             case 2:
@@ -256,6 +322,58 @@ void priorityMenu(PriorityQueue& priorityQueue)
 
             case 3:
                 priorityQueue.dequeue();
+                break;
+
+            case 0:
+                cout << "Returning to main menu...\n";
+                break;
+
+            default:
+                cout << "Invalid choice.\n";
+        }
+
+    } while (choice != 0);
+}
+
+// Family and Group Travel Assistance Menu
+void groupTravelMenu(
+    GroupTravelManager& groupTravelManager,
+    PassengerManager& passengerManager,
+    FlightManager& flightManager)
+{
+    int choice;
+
+    do
+    {
+        cout << "\n========== Family & Group Travel Assistance ==========\n";
+        cout << "1. Create Travel Group\n";
+        cout << "2. Add Passenger to Group\n";
+        cout << "3. Display Group Travel Status\n";
+        cout << "0. Back\n";
+        cout << "Enter your choice: ";
+
+        if (!(cin >> choice))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Enter a number.\n";
+            continue;
+        }
+
+        switch (choice)
+        {
+            case 1:
+                groupTravelManager.createGroup(flightManager);
+                break;
+
+            case 2:
+                groupTravelManager.addPassengerToGroup(
+                    passengerManager, flightManager);
+                break;
+
+            case 3:
+                groupTravelManager.displayGroupStatuses(
+                    passengerManager, flightManager);
                 break;
 
             case 0:
@@ -372,8 +490,7 @@ void notificationMenu(NotificationManager& notificationManager)
                 cout << "Enter Flight Status: ";
                 getline(cin, status);
 
-                notificationManager.notifyFlightStatus(
-                    passengerId, passengerName, flightNumber, status);
+                notificationManager.notifyFlightStatus(passengerId, passengerName, flightNumber, status);
                 break;
 
             case 5:
@@ -447,8 +564,7 @@ void notificationMenu(NotificationManager& notificationManager)
                 cout << "Enter Passenger ID: ";
                 getline(cin, passengerId);
 
-                notificationManager.displayUnreadNotifications(
-                    passengerId);
+                notificationManager.displayUnreadNotifications(passengerId);
                 break;
 
             case 10:
@@ -492,6 +608,8 @@ int main()
 
     NotificationManager& notificationManager = airportSystem.getNotificationManager();
 
+    GroupTravelManager& groupTravelManager = airportSystem.getGroupTravelManager();
+
     int choice;
 
     do
@@ -505,7 +623,8 @@ int main()
         cout << "3. Check-In Management\n";
         cout << "4. Boarding Management\n";
         cout << "5. Priority Assistance\n";
-        cout << "6. Personalized Airport Notifications\n";
+        cout << "6. Family & Group Travel Assistance\n";
+        cout << "7. Personalized Airport Notifications\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
 
@@ -514,7 +633,8 @@ int main()
         switch (choice)
         {
             case 1:
-                flightMenu(flightManager, passengerManager, notificationManager, checkInQueue, boardingQueue);
+                flightMenu(flightManager, passengerManager, notificationManager, checkInQueue,
+                boardingQueue, priorityQueue);
                 break;
 
             case 2:
@@ -530,10 +650,14 @@ int main()
                 break;
 
             case 5:
-                priorityMenu(priorityQueue);
+                priorityMenu(priorityQueue, passengerManager, flightManager);
+                break;
+
+            case 6:
+                groupTravelMenu(groupTravelManager, passengerManager, flightManager);
                 break;
             
-            case 6:
+            case 7:
                 notificationMenu(notificationManager);
                 break;
 
