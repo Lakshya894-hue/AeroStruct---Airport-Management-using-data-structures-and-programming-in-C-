@@ -4,10 +4,11 @@
 #include "NotificationManager.h"
 #include "CheckInQueue.h"
 #include "BoardingQueue.h"
+#include "PriorityQueue.h"
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <limits>
 using namespace std;
 
 FlightManager::FlightManager(int maxFlights)
@@ -35,6 +36,7 @@ void FlightManager::addFlight()
     string departureTime;
     string arrivalTime;
     string status;
+    double fare;
 
     cin.ignore();
     cout << "Enter Flight Number: ";
@@ -69,6 +71,24 @@ void FlightManager::addFlight()
     cout << "Enter Status: ";
     getline(cin,status);
 
+    cout << "Enter Ticket Fare (INR): ";
+
+    while (!(cin >> fare) || fare < 0)
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        cout << "Invalid fare. Enter a non-negative amount: ";
+        // Retry the input.
+        if (cin >> fare && fare >= 0)
+        {
+            break;
+        }
+
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
     flights[size].setFlightNumber(flightNumber);
     flights[size].setAirline(airline);
     flights[size].setSource(source);
@@ -76,6 +96,7 @@ void FlightManager::addFlight()
     flights[size].setDepartureTime(departureTime);
     flights[size].setArrivalTime(arrivalTime);
     flights[size].setStatus(status);
+    flights[size].setFare(fare);
 
     size++;
 
@@ -126,7 +147,7 @@ void FlightManager::searchFlight()
     cout << "Flight not found.\n";
 }
 
-bool FlightManager::flightExists(const std::string& flightNumber)
+bool FlightManager::flightExists(const string& flightNumber)
 {
     for (int i = 0; i < size; i++)
     {
@@ -139,9 +160,12 @@ bool FlightManager::flightExists(const std::string& flightNumber)
     return false;
 }
 
-void FlightManager::updateFlight(PassengerManager& passengerManager,
-    NotificationManager& notificationManager,CheckInQueue& checkInQueue,
-    BoardingQueue& boardingQueue)
+void FlightManager::updateFlight(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue)
 {
     if (size == 0)
     {
@@ -164,6 +188,7 @@ void FlightManager::updateFlight(PassengerManager& passengerManager,
             string departureTime;
             string arrivalTime;
             string status;
+            double fare;
 
             // Save the old details before updating the flight
             string oldDeparture = flights[i].getDepartureTime();
@@ -194,36 +219,28 @@ void FlightManager::updateFlight(PassengerManager& passengerManager,
 
             for (char& ch : normalizedStatus)
             {
-                ch = static_cast<char>(
-                    tolower(static_cast<unsigned char>(ch))
-                );
+                ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));//converts character to lower case
             }
 
             string normalizedOldStatus = oldStatus;
 
             for (char& ch : normalizedOldStatus)
             {
-                ch = static_cast<char>(
-                    tolower(static_cast<unsigned char>(ch))
-                );
+                ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
             }
 
-            bool departureChanged =
-                oldDeparture != departureTime;
+            bool departureChanged = oldDeparture != departureTime;
 
-            bool statusChanged =
-                oldStatus != status;
+            bool statusChanged = oldStatus != status;
 
-            bool isCancelled =
-                normalizedStatus == "cancelled" ||
+            bool isCancelled = normalizedStatus == "cancelled" ||
                 normalizedStatus == "canceled";
 
-            bool wasCancelled =
-                normalizedOldStatus == "cancelled" ||
+            bool wasCancelled = normalizedOldStatus == "cancelled" ||
                 normalizedOldStatus == "canceled";
 
             bool isDelayed =
-                normalizedStatus.find("delay") != string::npos;
+                normalizedStatus.find("delay") != string::npos; //found if delay exist
 
             // Update the flight details
             flights[i].setAirline(airline);
@@ -232,6 +249,7 @@ void FlightManager::updateFlight(PassengerManager& passengerManager,
             flights[i].setDepartureTime(departureTime);
             flights[i].setArrivalTime(arrivalTime);
             flights[i].setStatus(status);
+            flights[i].setFare(fare);
 
             cout << "Flight updated successfully.\n";
 
@@ -245,6 +263,10 @@ void FlightManager::updateFlight(PassengerManager& passengerManager,
                 int checkInRemoved = checkInQueue.removePassengersByFlightNumber(flightNumber);
 
                 int boardingRemoved = boardingQueue.removePassengersByFlightNumber(flightNumber);
+
+                int priorityRemoved = priorityQueue.removePassengersByFlightNumber(flightNumber);
+
+                cout << "Priority requests removed: " << priorityRemoved << '\n';
 
                 cout << "Passengers removed from Check-In Queue: "<< checkInRemoved << "\n";
 
@@ -299,9 +321,12 @@ void FlightManager::deleteFlight()
     cout << "Flight not found.\n";
 }
 
-void FlightManager::cancelFlight(PassengerManager& passengerManager,NotificationManager& notificationManager,
+void FlightManager::cancelFlight(
+    PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
     CheckInQueue& checkInQueue,
-    BoardingQueue& boardingQueue)
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue)
 {
     if (size == 0)
     {
@@ -331,9 +356,7 @@ void FlightManager::cancelFlight(PassengerManager& passengerManager,Notification
             cout << "Flight cancelled successfully.\n";
 
             // Notify passengers booked on this flight
-            passengerManager.notifyFlightCancellation(
-                flightNumber,
-                notificationManager);
+            passengerManager.notifyFlightCancellation(flightNumber,notificationManager);
 
             // Remove affected passengers from both queues
             int checkInRemoved =
@@ -343,6 +366,11 @@ void FlightManager::cancelFlight(PassengerManager& passengerManager,Notification
             int boardingRemoved =
                 boardingQueue.removePassengersByFlightNumber(
                     flightNumber);
+            
+            int priorityRemoved =
+                priorityQueue.removePassengersByFlightNumber(flightNumber);
+
+                cout << "Priority requests removed: "<< priorityRemoved << '\n';
 
             cout << "Passengers removed from Check-In Queue: "
                  << checkInRemoved << "\n";
@@ -386,8 +414,7 @@ void FlightManager::sortFlights()
 
         for (int j = 0; j < size - i - 1; j++)
         {
-            if (flights[j].getFlightNumber() >
-                flights[j + 1].getFlightNumber())
+            if (flights[j].getFlightNumber() > flights[j + 1].getFlightNumber())
             {
                 flights[j].swapFlight(flights[j + 1]);
                 swapped = true;
