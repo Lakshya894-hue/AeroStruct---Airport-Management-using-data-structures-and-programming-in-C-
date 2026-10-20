@@ -9,6 +9,10 @@
 #include "UndoStack.h"
 #include "AirportSystem.h"
 #include "NotificationManager.h"
+#include "AirportNavigator.h"
+#include "EmergencyAssistanceManager.h"
+#include "BaggageManager.h"
+#include "AirportSystem.h"
 #include <limits>
 
 using namespace std;
@@ -538,13 +542,11 @@ void notificationMenu(NotificationManager& notificationManager)
 
                 if (reason.empty())
                 {
-                    notificationManager.notifyCancellation(
-                        passengerId, passengerName, flightNumber);
+                    notificationManager.notifyCancellation(passengerId, passengerName, flightNumber);
                 }
                 else
                 {
-                    notificationManager.notifyCancellation(
-                        passengerId, passengerName, flightNumber, reason);
+                    notificationManager.notifyCancellation(passengerId, passengerName, flightNumber, reason);
                 }
                 break;
 
@@ -586,12 +588,119 @@ void notificationMenu(NotificationManager& notificationManager)
     } while (choice != 0);
 }
 
+
+// Baggage Management Menu
+void baggageMenu(
+    BaggageManager& baggageManager,
+    PassengerManager& passengerManager,
+    FlightManager& flightManager)
+{
+    int choice = -1;
+
+    while (true)
+    {
+        cout << "\n========== Baggage Management ==========\n";
+        cout << "1. Register Baggage\n";
+        cout << "2. Process Next Baggage\n";
+        cout << "3. Mark Baggage Arrived\n";
+        cout << "4. Mark Baggage Collected\n";
+        cout << "5. Requeue Held Baggage\n";
+        cout << "6. Search Baggage\n";
+        cout << "7. Display All Baggage\n";
+        cout << "8. Display Passenger Baggage\n";
+        cout << "9. Display Handling Queue\n";
+        cout << "10. Report Baggage Issue\n";
+        cout << "11. Update Baggage Issue Status\n";
+        cout << "0. Back\n";
+        cout << "Enter your choice: ";
+
+        if (!(cin >> choice))
+        {
+            if (cin.eof())
+                return;
+
+            cin.clear();
+            cin.ignore(
+                numeric_limits<streamsize>::max(), '\n');
+
+            cout << "Invalid input. Enter a whole number.\n";
+            continue;
+        }
+
+        // Clear the newline before baggage functions use getline().
+        cin.ignore(
+            numeric_limits<streamsize>::max(), '\n');
+
+        switch (choice)
+        {
+            case 1:
+                baggageManager.registerBaggage(
+                    passengerManager, flightManager);
+                break;
+
+            case 2:
+                baggageManager.processNextBaggage(
+                    flightManager);
+                break;
+
+            case 3:
+                baggageManager.markBaggageArrived(
+                    flightManager);
+                break;
+
+            case 4:
+                baggageManager.markBaggageCollected();
+                break;
+
+            case 5:
+                baggageManager.requeueHeldBaggage(
+                    flightManager);
+                break;
+
+            case 6:
+                baggageManager.searchBaggage();
+                break;
+
+            case 7:
+                baggageManager.displayAllBaggage();
+                break;
+
+            case 8:
+                baggageManager.displayPassengerBaggage();
+                break;
+
+            case 9:
+                baggageManager.displayHandlingQueue();
+                break;
+
+            case 10:
+                baggageManager.reportBaggageIssue();
+                break;
+
+            case 11:
+                baggageManager.updateBaggageIssueStatus();
+                break;
+
+            case 0:
+                cout << "Returning to main menu...\n";
+                return;
+
+            default:
+                cout << "Invalid choice. Select an option from 0 to 11.\n";
+        }
+    }
+}
+
+
 // Main Function
 
 int main()
 {
     // One AirportSystem object owns all the managers and queues.
     AirportSystem airportSystem;
+    AirportNavigator airportNavigator;
+
+    EmergencyAssistanceManager emergencyAssistanceManager;
 
     // Get references to the components owned by AirportSystem.
     FlightManager& flightManager = airportSystem.getFlightManager();
@@ -610,6 +719,9 @@ int main()
 
     GroupTravelManager& groupTravelManager = airportSystem.getGroupTravelManager();
 
+    BaggageManager& baggageManager = airportSystem.getBaggageManager();
+
+
     int choice;
 
     do
@@ -622,10 +734,13 @@ int main()
         cout << "2. Passenger Management\n";
         cout << "3. Check-In Management\n";
         cout << "4. Boarding Management\n";
-        cout << "5. Priority Assistance\n";
-        cout << "6. Family & Group Travel Assistance\n";
-        cout << "7. Personalized Airport Notifications\n";
-        cout << "0. Exit\n";
+        cout << "5. Baggage Management\n";
+        cout << "6. Priority Assistance\n";
+        cout << "7. Family & Group Travel Assistance\n";
+        cout << "8. Personalized Airport Notifications\n";
+        cout << "9. Airport Navigator\n";
+        cout << "10. Emergency Assistance System\n";
+        cout << "0. Exit\n";;
         cout << "Enter your choice: ";
 
         cin >> choice;
@@ -650,17 +765,31 @@ int main()
                 break;
 
             case 5:
-                priorityMenu(priorityQueue, passengerManager, flightManager);
+                baggageMenu(baggageManager, passengerManager, flightManager);
                 break;
 
             case 6:
+                priorityMenu(priorityQueue, passengerManager, flightManager);
+                break;
+
+            case 7:
                 groupTravelMenu(groupTravelManager, passengerManager, flightManager);
                 break;
             
-            case 7:
+            case 8:
                 notificationMenu(notificationManager);
                 break;
 
+            case 9:
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                airportNavigator.runMenu();
+                break;
+
+            case 10:
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                emergencyAssistanceManager.runMenu(passengerManager, flightManager, airportNavigator);
+                break;
+            
             case 0:
                 cout << "\nThank you for using AeroStruct!\n";
                 break;
