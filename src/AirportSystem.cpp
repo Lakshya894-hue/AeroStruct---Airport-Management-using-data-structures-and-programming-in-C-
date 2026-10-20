@@ -40,7 +40,13 @@ NotificationManager& AirportSystem::getNotificationManager()
 {
     return notificationManager;
 }
+
 GroupTravelManager& AirportSystem::getGroupTravelManager()
 {
     return groupTravelManager;
+}
+
+BaggageManager& AirportSystem::getBaggageManager()
+{
+    return baggageManager;
 }
