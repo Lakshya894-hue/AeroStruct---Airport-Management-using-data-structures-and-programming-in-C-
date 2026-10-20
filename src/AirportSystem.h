@@ -9,6 +9,7 @@
 #include "UndoStack.h"
 #include "NotificationManager.h"
 #include "GroupTravelManager.h"
+#include "BaggageManager.h"
 
 class AirportSystem
 {
@@ -21,6 +22,7 @@ private:
     UndoStack undoStack;
     NotificationManager notificationManager;
     GroupTravelManager groupTravelManager;
+    BaggageManager baggageManager;  
 
 public:
     FlightManager& getFlightManager();
@@ -31,6 +33,9 @@ public:
     UndoStack& getUndoStack();
     NotificationManager& getNotificationManager();
     GroupTravelManager& getGroupTravelManager();
+
+    BaggageManager& getBaggageManager();  
+
     AirportSystem();
 };
 
