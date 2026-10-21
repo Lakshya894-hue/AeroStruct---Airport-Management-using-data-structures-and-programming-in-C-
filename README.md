@@ -348,19 +348,6 @@ Dijkstra's Algorithm can be used when route distances are weighted.
 
 ---
 
-## Waiting-Time Estimator
-
-The system can estimate waiting time at airport service points using
-information such as:
-
-- Queue length
-- Number of active counters
-- Average processing time
-
-This can help passengers understand expected waiting time.
-
----
-
 ## Gate Change Assistance
 
 When a gate changes, the system can display:
