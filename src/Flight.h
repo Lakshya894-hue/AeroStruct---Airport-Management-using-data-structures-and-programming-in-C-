@@ -15,6 +15,7 @@ private:
     string arrivalTime;
     string status;
     double fare;
+    string gate;
 
 public:
     Flight();
@@ -25,14 +26,15 @@ public:
 
     void display();
 
-    string getFlightNumber();
-    string getAirline();
-    string getSource();
-    string getDestination();
-    string getDepartureTime();
-    string getArrivalTime();
-    string getStatus();
-    double getFare();
+    string getFlightNumber() const;
+    string getAirline() const;
+    string getSource() const;
+    string getDestination() const;
+    string getDepartureTime() const;
+    string getArrivalTime() const;
+    string getStatus() const;
+    double getFare() const;
+    string getGate() const;
 
     void setFlightNumber(string fno);
     void setAirline(string air);
@@ -42,6 +44,7 @@ public:
     void setArrivalTime(string arr);
     void setStatus(string stat);
     void setFare(double amount);
+    void setGate(string g);
 
     void swapFlight(Flight &other);
 };
