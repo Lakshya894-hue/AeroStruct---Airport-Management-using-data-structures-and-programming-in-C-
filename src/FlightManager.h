@@ -37,6 +37,19 @@ public:
     void suggestAlternativeFlights();
     bool flightExists(const std::string& flightNumber);
     bool getFlightStatus(const std::string& flightNumber, std::string& status);
+
+    // Non-interactive operations for API integration
+    int getFlightCount() const;
+
+    bool getFlightAt(int index, Flight& result) const;
+
+    bool findFlightRecord(const std::string& flightNumber, Flight& result);
+
+    bool addFlightRecord(Flight flight);
+
+    bool updateFlightRecord(const std::string& flightNumber, Flight updatedFlight);
+
+    bool removeFlightRecord(const std::string& flightNumber);
 };
 
 #endif
