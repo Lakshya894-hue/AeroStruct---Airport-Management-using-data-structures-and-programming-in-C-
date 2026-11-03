@@ -41,6 +41,17 @@ public:
 
     bool isEmpty() const;
 
+    // API-friendly check-in queue operations
+    bool enqueueRecord(const Passenger& passenger);
+
+    bool dequeueRecord(Passenger& passenger);
+
+    bool containsPassenger(const std::string& passengerId) const;
+
+    std::size_t getQueueSize() const;
+
+    bool getPassengerAt(std::size_t index, Passenger& passenger) const;
+
     int removePassengersByFlightNumber(const std::string& flightNumber);
 };
 
