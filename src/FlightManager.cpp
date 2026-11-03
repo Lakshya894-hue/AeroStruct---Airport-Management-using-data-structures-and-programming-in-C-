@@ -122,6 +122,7 @@ void FlightManager::displayFlights()
 
 void FlightManager::searchFlight()
 {
+    //Linear Search
     if (size == 0)
     {
         cout << "No flights available.\n";
@@ -160,8 +161,7 @@ bool FlightManager::flightExists(const string& flightNumber)
     return false;
 }
 
-void FlightManager::updateFlight(
-    PassengerManager& passengerManager,
+void FlightManager::updateFlight(PassengerManager& passengerManager,
     NotificationManager& notificationManager,
     CheckInQueue& checkInQueue,
     BoardingQueue& boardingQueue,
@@ -214,6 +214,18 @@ void FlightManager::updateFlight(
             cout << "Enter Status: ";
             getline(cin, status);
 
+            cout << "Enter Ticket Fare (INR): ";
+
+            while (!(cin >> fare) || fare < 0)
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                cout << "Invalid fare. Enter a non-negative amount: ";
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
             // Normalize status text for comparisons
             string normalizedStatus = status;
 
@@ -233,8 +245,7 @@ void FlightManager::updateFlight(
 
             bool statusChanged = oldStatus != status;
 
-            bool isCancelled = normalizedStatus == "cancelled" ||
-                normalizedStatus == "canceled";
+            bool isCancelled = normalizedStatus == "cancelled" || normalizedStatus == "canceled";
 
             bool wasCancelled = normalizedOldStatus == "cancelled" ||
                 normalizedOldStatus == "canceled";
@@ -321,8 +332,7 @@ void FlightManager::deleteFlight()
     cout << "Flight not found.\n";
 }
 
-void FlightManager::cancelFlight(
-    PassengerManager& passengerManager,
+void FlightManager::cancelFlight(PassengerManager& passengerManager,
     NotificationManager& notificationManager,
     CheckInQueue& checkInQueue,
     BoardingQueue& boardingQueue,
@@ -359,24 +369,17 @@ void FlightManager::cancelFlight(
             passengerManager.notifyFlightCancellation(flightNumber,notificationManager);
 
             // Remove affected passengers from both queues
-            int checkInRemoved =
-                checkInQueue.removePassengersByFlightNumber(
-                    flightNumber);
+            int checkInRemoved = checkInQueue.removePassengersByFlightNumber(flightNumber);
 
-            int boardingRemoved =
-                boardingQueue.removePassengersByFlightNumber(
-                    flightNumber);
+            int boardingRemoved = boardingQueue.removePassengersByFlightNumber(flightNumber);
             
-            int priorityRemoved =
-                priorityQueue.removePassengersByFlightNumber(flightNumber);
+            int priorityRemoved = priorityQueue.removePassengersByFlightNumber(flightNumber);
 
                 cout << "Priority requests removed: "<< priorityRemoved << '\n';
 
-            cout << "Passengers removed from Check-In Queue: "
-                 << checkInRemoved << "\n";
+            cout << "Passengers removed from Check-In Queue: " << checkInRemoved << "\n";
 
-            cout << "Passengers removed from Boarding Queue: "
-                 << boardingRemoved << "\n";
+            cout << "Passengers removed from Boarding Queue: " << boardingRemoved << "\n";
 
             return;
         }
@@ -466,10 +469,8 @@ void FlightManager::suggestAlternativeFlights()
     flights[index].display();
 
     // Find alternative flights on the same route
-    vector<SmartFlightOption> alternatives =
-        SmartFlightSuggestion::findAlternatives(
-            flights[index], flights, size
-        );
+    vector<SmartFlightOption> alternatives = SmartFlightSuggestion::findAlternatives(
+        flights[index], flights, size);
 
     if (alternatives.empty())
     {
@@ -497,6 +498,91 @@ void FlightManager::suggestAlternativeFlights()
              << alternatives[i].status << endl;
         cout << "--------------------------------------\n";
     }
+}
+
+// Return the number of flights currently stored.
+int FlightManager::getFlightCount() const
+{
+    return size;
+}
+
+// Retrieve a flight by its zero-based index.
+bool FlightManager::getFlightAt(int index, Flight& result) const
+{
+    if (index < 0 || index >= size)
+        return false;
+
+    result = flights[index];
+    return true;
+}
+
+// Search for a flight by flight number.
+bool FlightManager::findFlightRecord(const std::string& flightNumber, Flight& result)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            result = flights[i];
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Add a flight without requesting console input.
+bool FlightManager::addFlightRecord(Flight flight)
+{
+    if (size >= capacity)
+        return false;
+
+    if (flight.getFlightNumber().empty())
+        return false;
+
+    if (flightExists(flight.getFlightNumber()))
+        return false;
+
+    flights[size] = flight;
+    size++;
+
+    return true;
+}
+
+// Update an existing flight while preserving its flight number.
+bool FlightManager::updateFlightRecord(const std::string& flightNumber, Flight updatedFlight)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            updatedFlight.setFlightNumber(flightNumber);
+            flights[i] = updatedFlight;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Remove a flight and preserve the order of the remaining flights.
+bool FlightManager::removeFlightRecord(const std::string& flightNumber)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            for (int j = i; j < size - 1; j++)
+            {
+                flights[j].swapFlight(flights[j + 1]);
+            }
+
+            size--;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 FlightManager::~FlightManager()
