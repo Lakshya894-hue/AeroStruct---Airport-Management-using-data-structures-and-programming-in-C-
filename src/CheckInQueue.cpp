@@ -39,6 +39,104 @@ bool CheckInQueue::isEmpty() const
     return front == nullptr;
 }
 
+// ==========================================
+// API-FRIENDLY CHECK-IN QUEUE OPERATIONS
+// ==========================================
+
+// Check whether a passenger is already in the queue
+bool CheckInQueue::containsPassenger(const std::string& passengerId) const
+{
+    Node* current = front;
+
+    while (current != nullptr)
+    {
+        if (current->data.getPassengerId() == passengerId)
+            return true;
+
+        current = current->next;
+    }
+
+    return false;
+}
+
+
+// Add a passenger to the rear of the queue
+bool CheckInQueue::enqueueRecord(const Passenger& passenger)
+{
+    if (passenger.getPassengerId().empty())
+        return false;
+
+    if (containsPassenger(passenger.getPassengerId()))
+        return false;
+
+    Node* newNode = new Node(passenger);
+
+    if (front == nullptr)
+    {
+        front = newNode;
+        rear = newNode;
+    }
+    else
+    {
+        rear->next = newNode;
+        rear = newNode;
+    }
+
+    size++;
+
+    return true;
+}
+
+
+// Remove the passenger at the front of the queue
+bool CheckInQueue::dequeueRecord(Passenger& passenger)
+{
+    if (isEmpty())
+        return false;
+
+    Node* temp = front;
+
+    passenger = temp->data;
+
+    front = front->next;
+
+    if (front == nullptr)
+        rear = nullptr;
+
+    delete temp;
+    size--;
+
+    return true;
+}
+
+
+// Return the current queue size
+std::size_t CheckInQueue::getQueueSize() const
+{
+    return size;
+}
+
+
+// Retrieve a passenger using zero-based indexing
+bool CheckInQueue::getPassengerAt(
+    std::size_t index,
+    Passenger& passenger) const
+{
+    if (index >= size)
+        return false;
+
+    Node* current = front;
+
+    for (std::size_t i = 0; i < index; i++)
+    {
+        current = current->next;
+    }
+
+    passenger = current->data;
+
+    return true;
+}
+
 // Enqueue Passenger
 // Enqueue a registered passenger and generate a check-in notification
 void CheckInQueue::enqueue(PassengerManager& passengerManager, FlightManager& flightManager,
@@ -68,7 +166,7 @@ void CheckInQueue::enqueue(PassengerManager& passengerManager, FlightManager& fl
 
     // Retrieve details from Passenger Management
     if (!passengerManager.getPassengerQueueDetails(id, name, age, gender, phone, flight,
-            seat, assistance, status))
+        seat, assistance, status))
     {
         cout << "Passenger not found in Passenger Management.\n";
         cout << "Please register the passenger first.\n";
