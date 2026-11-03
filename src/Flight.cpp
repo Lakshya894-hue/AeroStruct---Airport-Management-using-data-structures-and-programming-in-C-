@@ -1,134 +1,591 @@
-#include "Flight.h"
+#include "FlightManager.h"
+#include "SmartFlightSuggestion.h"
+#include "PassengerManager.h"
+#include "NotificationManager.h"
+#include "CheckInQueue.h"
+#include "BoardingQueue.h"
+#include "PriorityQueue.h"
 #include <iostream>
-#include <utility>
-
+#include <string>
+#include <vector>
+#include <limits>
 using namespace std;
 
-Flight::Flight()
+FlightManager::FlightManager(int maxFlights)
 {
-    flightNumber = "";
-    airline = "";
-    source = "";
-    destination = "";
-    departureTime = "";
-    arrivalTime = "";
-    status = "Scheduled";
-    fare = 0.0;
+    capacity = maxFlights;
+    size = 0;
+
+    flights = new Flight[capacity];
 }
 
-Flight::Flight(string fno, string air, string src, string dest, string dep, 
-               string arr, string stat, double amount)
+
+
+void FlightManager::addFlight()
 {
-    flightNumber = fno;
-    airline = air;
-    source = src;
-    destination = dest;
-    departureTime = dep;
-    arrivalTime = arr;
-    status = stat;
-    fare = amount;
-}
-void Flight::display()
-{
-    cout << endl;
-    cout << "Flight Number : " << flightNumber << endl;
-    cout << "Airline       : " << airline << endl;
-    cout << "Source        : " << source << endl;
-    cout << "Destination   : " << destination << endl;
-    cout << "Departure     : " << departureTime << endl;
-    cout << "Arrival       : " << arrivalTime << endl;
-    cout << "Status        : " << status << endl;
-    cout << "Ticket Fare   : Rs. " << fare << endl;
+    if (size == capacity)
+    {
+        cout << "Flight storage is full.\n";
+        return;
+    }
+
+    string flightNumber;
+    string airline;
+    string source;
+    string destination;
+    string departureTime;
+    string arrivalTime;
+    string status;
+    double fare;
+
+    cin.ignore();
+    cout << "Enter Flight Number: ";
+    getline(cin,flightNumber);
+
+    // Check for duplicate flight number
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            cout << "Flight with this number already exists.\n";
+            return;
+        }
+    }
+
+    cin.ignore();
+    cout << "Enter Airline: ";
+    getline(cin,airline);
+
+    cout << "Enter Source: ";
+    getline(cin,source);
+
+    cout << "Enter Destination: ";
+    getline(cin,destination);
+
+    cout << "Enter Departure Time: ";
+    getline(cin,departureTime);
+
+    cout << "Enter Arrival Time: ";
+    getline(cin,arrivalTime);
+
+    cout << "Enter Status: ";
+    getline(cin,status);
+
+    cout << "Enter Ticket Fare (INR): ";
+
+    while (!(cin >> fare) || fare < 0)
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        cout << "Invalid fare. Enter a non-negative amount: ";
+        // Retry the input.
+        if (cin >> fare && fare >= 0)
+        {
+            break;
+        }
+
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    flights[size].setFlightNumber(flightNumber);
+    flights[size].setAirline(airline);
+    flights[size].setSource(source);
+    flights[size].setDestination(destination);
+    flights[size].setDepartureTime(departureTime);
+    flights[size].setArrivalTime(arrivalTime);
+    flights[size].setStatus(status);
+    flights[size].setFare(fare);
+
+    size++;
+
+    cout << "Flight added successfully.\n";
 }
 
-string Flight::getFlightNumber()
+void FlightManager::displayFlights()
 {
-    return flightNumber;
+    if (size == 0)
+    {
+        cout << "No flights available.\n";
+        return;
+    }
+
+    cout << "\n========== ALL FLIGHTS ==========\n";
+
+    for (int i = 0; i < size; i++)
+    {
+        cout << "\nFlight " << i + 1 << endl;
+        flights[i].display();
+    }
 }
 
-string Flight::getAirline()
+void FlightManager::searchFlight()
 {
-    return airline;
+    //Linear Search
+    if (size == 0)
+    {
+        cout << "No flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cin.ignore();
+    cout << "Enter Flight Number to search: ";
+    getline(cin,flightNumber);
+
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            cout << "Flight found:\n";
+            flights[i].display();
+            return;
+        }
+    }
+
+    cout << "Flight not found.\n";
 }
 
-string Flight::getSource()
+bool FlightManager::flightExists(const string& flightNumber)
 {
-    return source;
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-string Flight::getDestination()
+void FlightManager::updateFlight(PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue)
 {
-    return destination;
+    if (size == 0)
+    {
+        cout << "No flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cout << "Enter Flight Number to update: ";
+    getline(cin >> ws, flightNumber);
+
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            string airline;
+            string source;
+            string destination;
+            string departureTime;
+            string arrivalTime;
+            string status;
+            double fare;
+
+            // Save the old details before updating the flight
+            string oldDeparture = flights[i].getDepartureTime();
+            string oldStatus = flights[i].getStatus();
+
+            cout << "\nFlight found. Enter updated details:\n";
+
+            cout << "Enter Airline: ";
+            getline(cin, airline);
+
+            cout << "Enter Source: ";
+            getline(cin, source);
+
+            cout << "Enter Destination: ";
+            getline(cin, destination);
+
+            cout << "Enter Departure Time: ";
+            getline(cin, departureTime);
+
+            cout << "Enter Arrival Time: ";
+            getline(cin, arrivalTime);
+
+            cout << "Enter Status: ";
+            getline(cin, status);
+
+            cout << "Enter Ticket Fare (INR): ";
+
+            while (!(cin >> fare) || fare < 0)
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                cout << "Invalid fare. Enter a non-negative amount: ";
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            // Normalize status text for comparisons
+            string normalizedStatus = status;
+
+            for (char& ch : normalizedStatus)
+            {
+                ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));//converts character to lower case
+            }
+
+            string normalizedOldStatus = oldStatus;
+
+            for (char& ch : normalizedOldStatus)
+            {
+                ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+            }
+
+            bool departureChanged = oldDeparture != departureTime;
+
+            bool statusChanged = oldStatus != status;
+
+            bool isCancelled = normalizedStatus == "cancelled" || normalizedStatus == "canceled";
+
+            bool wasCancelled = normalizedOldStatus == "cancelled" ||
+                normalizedOldStatus == "canceled";
+
+            bool isDelayed =
+                normalizedStatus.find("delay") != string::npos; //found if delay exist
+
+            // Update the flight details
+            flights[i].setAirline(airline);
+            flights[i].setSource(source);
+            flights[i].setDestination(destination);
+            flights[i].setDepartureTime(departureTime);
+            flights[i].setArrivalTime(arrivalTime);
+            flights[i].setStatus(status);
+            flights[i].setFare(fare);
+
+            cout << "Flight updated successfully.\n";
+
+            // Generate the appropriate notification
+            if (isCancelled && !wasCancelled)
+            {
+                // Notify all passengers booked on this flight
+                passengerManager.notifyFlightCancellation(flightNumber, notificationManager,"The flight has been cancelled.");
+
+                // Remove affected passengers from both queues
+                int checkInRemoved = checkInQueue.removePassengersByFlightNumber(flightNumber);
+
+                int boardingRemoved = boardingQueue.removePassengersByFlightNumber(flightNumber);
+
+                int priorityRemoved = priorityQueue.removePassengersByFlightNumber(flightNumber);
+
+                cout << "Priority requests removed: " << priorityRemoved << '\n';
+
+                cout << "Passengers removed from Check-In Queue: "<< checkInRemoved << "\n";
+
+                cout << "Passengers removed from Boarding Queue: "<< boardingRemoved << "\n";
+            }
+            else if (!isCancelled &&(statusChanged || departureChanged) &&isDelayed)
+            {
+                passengerManager.notifyFlightDelay(flightNumber,notificationManager, departureTime);
+            }
+            else if (!isCancelled && statusChanged)
+            {
+                passengerManager.notifyFlightStatusUpdate(flightNumber,notificationManager,status);
+            }
+
+            return;
+        }
+    }
+
+    cout << "Flight not found.\n";
 }
 
-string Flight::getDepartureTime()
+void FlightManager::deleteFlight()
 {
-    return departureTime;
+    if (size == 0)
+    {
+        cout << "No flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cin.ignore();
+    cout << "Enter Flight Number to delete: ";
+    getline(cin, flightNumber);
+
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            for (int j = i; j < size - 1; j++)
+            {
+                flights[j].swapFlight(flights[j + 1]);
+            }
+
+            size--;
+
+            cout << "\nFlight deleted successfully.\n";
+            return;
+        }
+    }
+
+    cout << "Flight not found.\n";
 }
 
-string Flight::getArrivalTime()
+void FlightManager::cancelFlight(PassengerManager& passengerManager,
+    NotificationManager& notificationManager,
+    CheckInQueue& checkInQueue,
+    BoardingQueue& boardingQueue,
+    PriorityQueue& priorityQueue)
 {
-    return arrivalTime;
+    if (size == 0)
+    {
+        cout << "No flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cout << "Enter Flight Number to cancel: ";
+    getline(cin >> ws, flightNumber);
+
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            // Prevent duplicate cancellation
+            if (flights[i].getStatus() == "Cancelled")
+            {
+                cout << "This flight is already cancelled.\n";
+                return;
+            }
+
+            // Update flight status
+            flights[i].setStatus("Cancelled");
+
+            cout << "Flight cancelled successfully.\n";
+
+            // Notify passengers booked on this flight
+            passengerManager.notifyFlightCancellation(flightNumber,notificationManager);
+
+            // Remove affected passengers from both queues
+            int checkInRemoved = checkInQueue.removePassengersByFlightNumber(flightNumber);
+
+            int boardingRemoved = boardingQueue.removePassengersByFlightNumber(flightNumber);
+            
+            int priorityRemoved = priorityQueue.removePassengersByFlightNumber(flightNumber);
+
+                cout << "Priority requests removed: "<< priorityRemoved << '\n';
+
+            cout << "Passengers removed from Check-In Queue: " << checkInRemoved << "\n";
+
+            cout << "Passengers removed from Boarding Queue: " << boardingRemoved << "\n";
+
+            return;
+        }
+    }
+
+    cout << "Flight not found.\n";
 }
 
-string Flight::getStatus()
+// Retrieve the status of a flight using its flight number
+bool FlightManager::getFlightStatus(const std::string& flightNumber, std::string& status)
 {
-    return status;
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            status = flights[i].getStatus();
+            return true;
+        }
+    }
+
+    return false;
 }
 
-double Flight::getFare()
+void FlightManager::sortFlights()
 {
-    return fare;
+    if (size <= 1)
+    {
+        cout << "Not enough flights to sort.\n";
+        return;
+    }
+
+    for (int i = 0; i < size - 1; i++)
+    {
+        bool swapped = false;
+
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (flights[j].getFlightNumber() > flights[j + 1].getFlightNumber())
+            {
+                flights[j].swapFlight(flights[j + 1]);
+                swapped = true;
+            }
+        }
+
+        if (!swapped)
+        {
+            break;
+        }
+    }
+
+    cout << "\nFlights sorted successfully by Flight Number.\n";
 }
 
-void Flight::setAirline(string air)
+void FlightManager::suggestAlternativeFlights()
 {
-    airline = air;
+    if (size == 0)
+    {
+        cout << "\nNo flights available.\n";
+        return;
+    }
+
+    string flightNumber;
+
+    cout << "\n========== Smart Flight Suggestions ==========\n";
+    cout << "Enter Flight Number: ";
+    getline(cin >> ws, flightNumber);
+
+    int index = -1;
+
+    // Find the selected flight
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1)
+    {
+        cout << "Flight not found.\n";
+        return;
+    }
+
+    cout << "\nSelected Flight:\n";
+    flights[index].display();
+
+    // Find alternative flights on the same route
+    vector<SmartFlightOption> alternatives = SmartFlightSuggestion::findAlternatives(
+        flights[index], flights, size);
+
+    if (alternatives.empty())
+    {
+        cout << "\nNo alternative flights found on this route.\n";
+        return;
+    }
+
+    cout << "\n========== Available Alternatives ==========\n";
+
+    for (size_t i = 0; i < alternatives.size(); i++)
+    {
+        cout << "\nOption " << i + 1 << endl;
+        cout << "Flight Number : "
+             << alternatives[i].flightNumber << endl;
+        cout << "Airline       : "
+             << alternatives[i].airline << endl;
+        cout << "Route         : "
+             << alternatives[i].source << " -> "
+             << alternatives[i].destination << endl;
+        cout << "Departure     : "
+             << alternatives[i].departureTime << endl;
+        cout << "Arrival       : "
+             << alternatives[i].arrivalTime << endl;
+        cout << "Status        : "
+             << alternatives[i].status << endl;
+        cout << "--------------------------------------\n";
+    }
 }
 
-void Flight::setFlightNumber(string fno)
+// Return the number of flights currently stored.
+int FlightManager::getFlightCount() const
 {
-    flightNumber = fno;
+    return size;
 }
 
-void Flight::setSource(string src)
+// Retrieve a flight by its zero-based index.
+bool FlightManager::getFlightAt(int index, Flight& result) const
 {
-    source = src;
+    if (index < 0 || index >= size)
+        return false;
+
+    result = flights[index];
+    return true;
 }
 
-void Flight::setDestination(string dest)
+// Search for a flight by flight number.
+bool FlightManager::findFlightRecord(const std::string& flightNumber, Flight& result)
 {
-    destination = dest;
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            result = flights[i];
+            return true;
+        }
+    }
+
+    return false;
 }
 
-void Flight::setDepartureTime(string dep)
+// Add a flight without requesting console input.
+bool FlightManager::addFlightRecord(Flight flight)
 {
-    departureTime = dep;
+    if (size >= capacity)
+        return false;
+
+    if (flight.getFlightNumber().empty())
+        return false;
+
+    if (flightExists(flight.getFlightNumber()))
+        return false;
+
+    flights[size] = flight;
+    size++;
+
+    return true;
 }
 
-void Flight::setArrivalTime(string arr)
+// Update an existing flight while preserving its flight number.
+bool FlightManager::updateFlightRecord(const std::string& flightNumber, Flight updatedFlight)
 {
-    arrivalTime = arr;
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            updatedFlight.setFlightNumber(flightNumber);
+            flights[i] = updatedFlight;
+            return true;
+        }
+    }
+
+    return false;
 }
 
-void Flight::setStatus(string stat)
+// Remove a flight and preserve the order of the remaining flights.
+bool FlightManager::removeFlightRecord(const std::string& flightNumber)
 {
-    status = stat;
+    for (int i = 0; i < size; i++)
+    {
+        if (flights[i].getFlightNumber() == flightNumber)
+        {
+            for (int j = i; j < size - 1; j++)
+            {
+                flights[j].swapFlight(flights[j + 1]);
+            }
+
+            size--;
+            return true;
+        }
+    }
+
+    return false;
 }
 
-void Flight::setFare(double amount)
+FlightManager::~FlightManager()
 {
-    fare = amount;
-}
-
-void Flight::swapFlight(Flight &other)
-{
-    swap(flightNumber, other.flightNumber);
-    swap(airline, other.airline);
-    swap(source, other.source);
-    swap(destination, other.destination);
-    swap(departureTime, other.departureTime);
-    swap(arrivalTime, other.arrivalTime);
-    swap(status, other.status);
-    swap(fare, other.fare);
+    delete[] flights;
 }
