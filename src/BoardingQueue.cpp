@@ -32,10 +32,114 @@ bool BoardingQueue::isEmpty() const
     return front == nullptr;
 }
 
+
+// Check whether a passenger is already in the boarding queue.
+bool BoardingQueue::containsPassenger(
+    const std::string& passengerId
+) const
+{
+    Node* current = front;
+
+    while (current != nullptr)
+    {
+        if (current->passenger.getPassengerId() == passengerId)
+            return true;
+
+        current = current->next;
+    }
+
+    return false;
+}
+
+
+// Add a passenger to the rear of the linked-list queue.
+bool BoardingQueue::enqueueRecord(
+    const Passenger& passenger,
+    const std::string& gate
+)
+{
+    if (passenger.getPassengerId().empty() ||
+        gate.empty() || gate.size() > 10 ||
+        containsPassenger(passenger.getPassengerId()))
+    {
+        return false;
+    }
+
+    Node* newNode = new Node(passenger, gate);
+
+    if (front == nullptr)
+    {
+        front = rear = newNode;
+    }
+    else
+    {
+        rear->next = newNode;
+        rear = newNode;
+    }
+
+    ++size;
+    return true;
+}
+
+
+// Remove the front passenger.
+bool BoardingQueue::dequeueRecord(
+    Passenger& passenger,
+    std::string& gate
+)
+{
+    if (isEmpty())
+        return false;
+
+    Node* temp = front;
+
+    passenger = temp->passenger;
+    gate = temp->gate;
+
+    front = front->next;
+
+    if (front == nullptr)
+        rear = nullptr;
+
+    delete temp;
+    --size;
+
+    return true;
+}
+
+
+// Return the number of passengers waiting.
+std::size_t BoardingQueue::getQueueSize() const
+{
+    return size;
+}
+
+
+// Retrieve a passenger at a specified queue position.
+bool BoardingQueue::getPassengerAt(
+    std::size_t index,
+    Passenger& passenger,
+    std::string& gate
+) const
+{
+    if (index >= size)
+        return false;
+
+    Node* current = front;
+
+    for (std::size_t i = 0; i < index; ++i)
+        current = current->next;
+
+    passenger = current->passenger;
+    gate = current->gate;
+
+    return true;
+}
+
+
 // Enqueue a registered passenger and generate a boarding reminder
 // Normal method: ask for a passenger ID.
-void BoardingQueue::enqueue(
-    PassengerManager& passengerManager,
+void BoardingQueue::enqueue(PassengerManager& passengerManager,
     FlightManager& flightManager,
     NotificationManager& notificationManager)
 {
@@ -45,8 +149,7 @@ void BoardingQueue::enqueue(
     cout << "Enter Passenger ID: ";
     getline(cin >> ws, id);
 
-    enqueuePassengerById(
-        id, passengerManager, flightManager, notificationManager);
+    enqueuePassengerById(id, passengerManager, flightManager, notificationManager);
 }
 
 
@@ -74,9 +177,8 @@ void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& pas
     }
 
     // 2. Retrieve the passenger's latest record.
-    if (!passengerManager.getPassengerQueueDetails(
-            id, name, age, gender, phone,
-            flight, seat, assistance, status))
+    if (!passengerManager.getPassengerQueueDetails(id, name, age, gender, phone,
+        flight, seat, assistance, status))
     {
         cout << "Passenger not found.\n";
         return;
@@ -94,7 +196,7 @@ void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& pas
     // Normalize flight status.
     for (char& ch : flightStatus)
     {
-        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));//converts into lowercase
     }
 
     if (flightStatus == "cancelled" ||flightStatus == "canceled")
@@ -111,8 +213,7 @@ void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& pas
         ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     }
 
-    if (normalizedStatus != "security-cleared" &&
-        normalizedStatus != "security cleared")
+    if (normalizedStatus != "security-cleared" && normalizedStatus != "security cleared")
     {
         cout << "Boarding denied: security clearance is required.\n";
         cout << "Current status: " << status << "\n";
@@ -124,11 +225,9 @@ void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& pas
     getline(cin >> ws, gate);
 
     // 6. Add passenger to the linked-list queue.
-    Passenger passenger(
-        id, name, age, gender, phone,
-        flight, seat, assistance, status);
+    Passenger passenger(id, name, age, gender, phone,flight, seat, assistance, status);
 
-    Node* newNode = new Node(passenger);
+    Node* newNode = new Node(passenger, gate);
 
     if (front == nullptr)
     {
@@ -145,8 +244,7 @@ void BoardingQueue::enqueuePassengerById(const string& id, PassengerManager& pas
     cout << "\nPassenger added to boarding queue successfully.\n";
 
     // 7. Send the boarding reminder.
-    notificationManager.sendBoardingReminder(
-        id, name, flight, gate);
+    notificationManager.sendBoardingReminder(id, name, flight, gate);
 }
 
 void BoardingQueue::dequeue(PassengerManager& passengerManager)
@@ -166,8 +264,7 @@ void BoardingQueue::dequeue(PassengerManager& passengerManager)
     string passengerId = temp->passenger.getPassengerId();
 
     // Update the original passenger record
-    bool updated = passengerManager.updatePassengerStatus(
-        passengerId, "Boarded");
+    bool updated = passengerManager.updatePassengerStatus(passengerId, "Boarded");
 
     // Remove passenger from the boarding queue
     front = front->next;
