@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050b1a">
+  <meta name="description" content="AeroStruct airport management system: operations console and passenger self-service portal.">
+  <title>Admin Portal · AeroStruct</title>
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=1400&q=66" imagesrcset="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=800&q=72 800w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=1400&q=66 1400w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=2000&q=66 2000w" imagesizes="100vw" fetchpriority="high">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="is-gate portal-mode-admin" data-portal-mode="admin">
+
+  <!-- ============ SHARED SVG SYMBOLS ============ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <path id="plane-glyph" d="M16 0 5 -2.6 -1 -13 -4.6 -13 -1.8 -2.2 -9 -2.4 -11.4 -6.8 -14 -6.8 -12 0 -14 6.8 -11.4 6.8 -9 2.4 -1.8 2.2 -4.6 13 -1 13 5 2.6Z"/>
+    </defs>
+  </svg>
+
+  <!-- ============ LANDING PAGE ============ -->
+  <div id="landing" class="landing" hidden>
+    <header class="l-nav" id="lNav">
+      <div class="l-nav-inner">
+        <a class="l-brand" href="#home" data-lscroll="home" aria-label="AeroStruct home">
+          <svg class="l-logo-mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 30c11 12 31 9 40-10" opacity=".65"/><g transform="translate(9 2) scale(1.32)"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g></svg>
+          <span>AeroStruct</span>
+        </a>
+        <nav class="l-links" id="lLinks" aria-label="Page sections">
+          <a href="#home" data-lscroll="home" class="active">Home</a>
+          <a href="#features" data-lscroll="features">Features</a>
+          <a href="#modules" data-lscroll="modules">Modules</a>
+          <a href="#technology" data-lscroll="technology">Technology</a>
+          <a href="#about" data-lscroll="about">About</a>
+          <button class="l-nav-cta l-nav-cta-mobile" type="button" data-action="open-gate">Dashboard</button>
+        </nav>
+        <button class="l-nav-cta" type="button" data-action="open-gate">Dashboard</button>
+        <button class="l-burger" type="button" data-action="toggle-lmenu" aria-label="Open menu" aria-expanded="false" aria-controls="lLinks"><span></span><span></span><span></span></button>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section id="home" class="l-hero" data-photo-box aria-label="AeroStruct introduction">
+        <div class="l-scenes" id="lScenes" aria-hidden="true">
+          <figure class="l-scene is-active" style="--pos:58% 55%;--pos-m:63% 50%">
+            <img src="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&amp;fit=crop&amp;w=1400&amp;q=66"
+                 srcset="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&amp;fit=crop&amp;w=800&amp;q=72 800w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&amp;fit=crop&amp;w=1400&amp;q=66 1400w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&amp;fit=crop&amp;w=2000&amp;q=66 2000w"
+                 sizes="100vw" alt="" fetchpriority="high" decoding="async">
+          </figure>
+          <figure class="l-scene" data-photo="hero2" style="--pos:50% 60%;--pos-m:55% 55%"></figure>
+          <figure class="l-scene" data-photo="hero3" style="--pos:50% 55%;--pos-m:45% 50%"></figure>
+          <figure class="l-scene" data-photo="hero4" style="--pos:50% 50%;--pos-m:60% 50%"></figure>
+        </div>
+        <div class="l-hero-shade" aria-hidden="true"></div>
+        <div class="l-glow l-glow-a" aria-hidden="true"></div><div class="l-glow l-glow-b" aria-hidden="true"></div>
+
+        <svg class="l-paths" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="lpGrad" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#2fd5f2" stop-opacity="0"/><stop offset=".55" stop-color="#2fd5f2" stop-opacity=".95"/><stop offset="1" stop-color="#7ee8fa" stop-opacity=".25"/></linearGradient>
+          </defs>
+          <path id="lp1" class="l-arc" d="M-30 600 C 240 250, 700 110, 1090 250 S 1380 430, 1480 340"/>
+          <path id="lp2" class="l-arc l-arc-2" d="M180 740 C 520 540, 900 590, 1190 430 S 1370 210, 1480 170"/>
+          <path id="lp3" class="l-arc l-arc-3" d="M-30 360 C 200 240, 430 210, 650 270"/>
+          <g class="l-radar" transform="translate(1090 250)"><circle class="core" r="5"/><circle class="ring" r="6"/><circle class="ring d2" r="6"/><circle class="ring d3" r="6"/><text x="12" y="-12">BOM</text></g>
+          <g class="l-radar" transform="translate(650 270)"><circle class="core" r="4"/><circle class="ring" r="5"/><circle class="ring d2" r="5"/><text x="10" y="-10">DEL</text></g>
+          <g class="l-radar" transform="translate(1190 430)"><circle class="core" r="4"/><circle class="ring d3" r="5"/><circle class="ring d2" r="5"/><text x="10" y="18">BLR</text></g>
+          <g class="l-plane"><use href="#plane-glyph"/><animateMotion dur="17s" repeatCount="indefinite" rotate="auto"><mpath href="#lp1"/></animateMotion></g>
+          <g class="l-plane l-plane-2"><use href="#plane-glyph"/><animateMotion dur="23s" begin="-8s" repeatCount="indefinite" rotate="auto"><mpath href="#lp2"/></animateMotion></g>
+          <g class="l-plane l-plane-3"><use href="#plane-glyph"/><animateMotion dur="12s" begin="-4s" repeatCount="indefinite" rotate="auto"><mpath href="#lp3"/></animateMotion></g>
+        </svg>
+
+        <div class="l-hero-inner">
+          <h1 class="l-h1">
+            <span class="l-logo-big"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 30c11 12 31 9 40-10" opacity=".65"/><g transform="translate(9 2) scale(1.32)"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g></svg><span>AeroStruct</span></span>
+            <span class="sr-only">: </span><span class="l-tagline">Intelligence in Every Operation.</span>
+          </h1>
+          <p class="l-sub">A modern airport management system powered by C++17 and Data Structures.</p>
+          <div class="l-actions">
+            <a class="l-btn l-btn-cyan" href="#features" data-lscroll="features">Explore Platform</a>
+            <button class="l-btn l-btn-glass" type="button" data-action="open-gate">View Demo</button>
+          </div>
+        </div>
+
+        <div class="l-stats" id="lStats" role="list" aria-label="Live demo figures">
+          <div class="l-stat" role="listitem"><span class="l-stat-icon" data-icon="plane" data-size="26" aria-hidden="true"></span><div><strong data-lstat="flights">0</strong><small>Total Flights</small></div></div>
+          <div class="l-stat" role="listitem"><span class="l-stat-icon" data-icon="users" data-size="26" aria-hidden="true"></span><div><strong data-lstat="passengers">0</strong><small>Passengers</small></div></div>
+          <div class="l-stat" role="listitem"><span class="l-stat-icon" data-icon="clock" data-size="26" aria-hidden="true"></span><div><strong data-lstat="delayed">0</strong><small>Delayed Flights</small></div></div>
+          <div class="l-stat" role="listitem"><span class="l-stat-icon" data-icon="close" data-size="26" aria-hidden="true"></span><div><strong data-lstat="cancelled">0</strong><small>Cancelled Flights</small></div></div>
+        </div>
+        <div class="l-scene-dots" id="lSceneDots" role="group" aria-label="Choose background scene"></div>
+      </section>
+
+      <!-- FEATURES -->
+      <section id="features" class="l-section l-features">
+        <div class="l-wrap l-features-grid">
+          <div class="l-features-copy reveal">
+            <h2>Smarter Operations<br>for a Better Tomorrow.</h2>
+            <p>From flight management to passenger assistance, AeroStruct brings intelligence, efficiency, and structure to modern airport operations.</p>
+            <a class="l-btn l-btn-blue" href="#technology" data-lscroll="technology">Learn More</a>
+          </div>
+          <div class="l-cards">
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="plane" data-size="26" aria-hidden="true"></span><h3>Flight Management</h3><p>Schedule, track and manage flights efficiently.</p></article>
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="users" data-size="26" aria-hidden="true"></span><h3>Passenger Management</h3><p>Handle passenger records and check-in operations.</p></article>
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="bag" data-size="26" aria-hidden="true"></span><h3>Baggage Tracking</h3><p>Track baggage status and handling queues.</p></article>
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="compass" data-size="26" aria-hidden="true"></span><h3>Airport Navigation</h3><p>Find the shortest walking route across the terminal.</p></article>
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="heart" data-size="26" aria-hidden="true"></span><h3>Priority Handling</h3><p>VIP, medical and emergency support.</p></article>
+            <article class="l-card reveal"><span class="l-card-icon" data-icon="flow" data-size="26" aria-hidden="true"></span><h3>Data Structures in Action</h3><p>Real-world application of DSA.</p></article>
+          </div>
+        </div>
+        <div class="l-strip" data-photo-box aria-hidden="true" id="lStrip"></div>
+      </section>
+
+      <!-- MODULES -->
+      <section id="modules" class="l-section l-modules">
+        <div class="l-wrap">
+          <header class="l-head reveal"><span class="l-eyebrow">MODULES</span><h2>Built around the passenger journey</h2><p>Two flagship services, each with its own control room view for staff and a self-service view for passengers.</p></header>
+
+          <article class="l-band l-band-assist reveal" data-photo-box data-lparallax>
+            <div class="l-band-media" id="lAssistMedia" aria-hidden="true"></div>
+            <div class="l-band-shade" aria-hidden="true"></div>
+            <div class="l-band-copy">
+              <span class="l-eyebrow">AEROASSIST</span>
+              <h3>Help that reaches the right passenger first.</h3>
+              <p>A priority desk orders every request by urgency while keeping arrival order for equals, and gives rule-based support advice for each assistance type.</p>
+              <ul class="l-ticks"><li>Five levels, from Emergency to Normal</li><li>Wheelchair, medical and VIP requests in one queue</li><li>Passengers can request help themselves</li></ul>
+              <button class="l-btn l-btn-cyan" type="button" data-action="open-gate">Open AeroAssist</button>
+            </div>
+            <div class="l-band-visual" aria-hidden="true">
+              <div class="l-pq"><div class="l-pq-row p1"><b>1</b><span>Emergency</span><i></i></div><div class="l-pq-row p2"><b>2</b><span>Medical</span><i></i></div><div class="l-pq-row p3"><b>3</b><span>Wheelchair</span><i></i></div><div class="l-pq-row p5"><b>5</b><span>Normal</span><i></i></div></div>
+            </div>
+          </article>
+
+          <article class="l-band l-band-track l-band-flip reveal" data-photo-box data-lparallax>
+            <div class="l-band-media" id="lTrackMedia" aria-hidden="true"></div>
+            <div class="l-band-shade" aria-hidden="true"></div>
+            <div class="l-band-copy">
+              <span class="l-eyebrow">AEROTRACK</span>
+              <h3>Every passenger and every bag, from start to finish.</h3>
+              <p>Follow the journey from registration to boarding, and each bag from loading to collection, with updates that appear live in both views.</p>
+              <ul class="l-ticks"><li>Registered → Checked-In → Security-Cleared → Boarded</li><li>Baggage: Registered → Loaded → Arrived → Collected</li><li>Notifications for delays, cancellations and connection risk</li></ul>
+              <button class="l-btn l-btn-cyan" type="button" data-action="open-gate">Open AeroTrack</button>
+            </div>
+            <div class="l-band-visual" aria-hidden="true">
+              <ol class="l-track"><li><i></i>Registered</li><li><i></i>Checked-In</li><li><i></i>Security-Cleared</li><li><i></i>Boarded</li></ol>
+            </div>
+          </article>
+
+          <div class="l-tiles">
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="plane" data-size="22" aria-hidden="true"></span><strong>Flights</strong><small>Schedule, delay, cancel</small></button>
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="users" data-size="22" aria-hidden="true"></span><strong>Passengers</strong><small>Records &amp; undo delete</small></button>
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="flow" data-size="22" aria-hidden="true"></span><strong>Check-in &amp; boarding</strong><small>FIFO queues</small></button>
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="group" data-size="22" aria-hidden="true"></span><strong>Family &amp; groups</strong><small>Travel together</small></button>
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="compass" data-size="22" aria-hidden="true"></span><strong>Airport Navigator</strong><small>Dijkstra, BFS, DFS</small></button>
+            <button class="l-tile reveal" type="button" data-action="open-gate"><span data-icon="alert" data-size="22" aria-hidden="true"></span><strong>Emergency desk</strong><small>Severity-ordered cases</small></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TECHNOLOGY -->
+      <section id="technology" class="l-section l-tech">
+        <div class="l-wrap l-tech-grid">
+          <div class="l-tech-copy reveal">
+            <span class="l-eyebrow">TECHNOLOGY</span>
+            <h2>Data structures, in action.</h2>
+            <p>AeroStruct combines C++17 data-structure modules with a MySQL-backed API and authenticated workspaces for airport staff and passengers.</p>
+            <svg class="l-graph" viewBox="0 0 360 200" aria-hidden="true" focusable="false">
+              <g class="lg-edges"><line x1="40" y1="100" x2="120" y2="40"/><line x1="40" y1="100" x2="120" y2="160"/><line x1="120" y1="40" x2="210" y2="70"/><line x1="120" y1="160" x2="210" y2="130"/><line x1="210" y1="70" x2="210" y2="130"/><line x1="210" y1="70" x2="320" y2="40"/><line x1="210" y1="130" x2="320" y2="160"/></g>
+              <path class="lg-route" d="M40 100 L120 40 L210 70 L320 40"/>
+              <g class="lg-nodes"><circle cx="40" cy="100" r="9"/><circle cx="120" cy="40" r="9"/><circle cx="120" cy="160" r="9"/><circle cx="210" cy="70" r="9"/><circle cx="210" cy="130" r="9"/><circle class="lg-dest" cx="320" cy="40" r="10"/><circle cx="320" cy="160" r="9"/></g>
+            </svg>
+          </div>
+          <div class="l-tech-cards">
+            <article class="l-tcard reveal"><code>LINKED LIST</code><h3>Passenger records</h3><p>Ordered records with unique IDs and validated edits.</p></article>
+            <article class="l-tcard reveal"><code>FIFO QUEUE</code><h3>Check-in, boarding &amp; baggage</h3><p>First in, first out, with clear wait estimates.</p></article>
+            <article class="l-tcard reveal"><code>PRIORITY QUEUE</code><h3>AeroAssist &amp; emergencies</h3><p>Urgency first; equal priority keeps arrival order.</p></article>
+            <article class="l-tcard reveal"><code>STACK</code><h3>Undo delete</h3><p>The most recent deletion comes back first.</p></article>
+            <article class="l-tcard reveal"><code>GRAPH</code><h3>Airport Navigator</h3><p>Dijkstra shortest path, plus BFS and DFS traversals.</p></article>
+            <article class="l-tcard reveal"><code>RANKING</code><h3>Smart flight suggestions</h3><p>A 50/50 score of fare and flight duration.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="l-section l-about" data-photo-box>
+        <div class="l-about-media" id="lAboutMedia" aria-hidden="true"></div>
+        <div class="l-about-shade" aria-hidden="true"></div>
+        <div class="l-wrap l-about-inner">
+          <div class="l-about-copy reveal">
+            <span class="l-eyebrow">ABOUT</span>
+            <h2>Structure behind every departure.</h2>
+            <p>AeroStruct brings flights, passengers, baggage and safety into one calm control room, and gives every traveller their own clear view of the journey.</p>
+            <p class="l-about-note">Flights, passenger records and operational workflows are served through the C++ API and MySQL. Access is scoped to your account role.</p>
+            <button class="l-btn l-btn-cyan" type="button" data-action="open-gate">Enter the platform</button>
+          </div>
+          <dl class="l-facts reveal">
+            <div><dt data-lcount="locations">12</dt><dd>Mapped terminal locations</dd></div>
+            <div><dt data-lcount="stages">4</dt><dd>Passenger journey stages</dd></div>
+            <div><dt data-lcount="priorities">5</dt><dd>Assistance priority levels</dd></div>
+            <div><dt data-lcount="algorithms">3</dt><dd>Graph algorithms</dd></div>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer class="l-footer">
+      <div class="l-wrap l-footer-inner">
+        <a class="l-brand" href="#home" data-lscroll="home"><svg class="l-logo-mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 30c11 12 31 9 40-10" opacity=".65"/><g transform="translate(9 2) scale(1.32)"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g></svg><span>AeroStruct</span></a>
+        <p>Airport Management System · C++17 · MySQL-backed API</p>
+        <button class="l-nav-cta" type="button" data-action="open-gate">Dashboard</button>
+      </div>
+      <p class="l-credits">Photography from Unsplash, used under the Unsplash licence.</p>
+    </footer>
+  </div>
+
+  <!-- ============ ROLE GATE ============ -->
+  <div id="roleGate" class="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-bg" aria-hidden="true">
+      <i class="aurora aurora-a"></i><i class="aurora aurora-b"></i><i class="aurora aurora-c"></i>
+      <i class="gate-grid"></i>
+      <span class="gate-plane gate-plane-a" data-icon="plane" data-size="34"></span>
+      <span class="gate-plane gate-plane-b" data-icon="plane" data-size="22"></span>
+    </div>
+    <div class="gate-inner">
+      <button class="gate-back" type="button" data-action="close-gate"><span data-icon="arrow" data-size="16" aria-hidden="true"></span> Back to home</button>
+      <div class="gate-brand"><span class="brand-mark" data-icon="plane" data-size="28" aria-hidden="true"></span><span><strong>AeroStruct</strong><small>Airport Management System</small></span></div>
+      <h1 id="gateTitle" class="gate-title">Administrator sign in.<br><span>Operations Console</span></h1>
+      <p class="gate-lead">Sign in with your authorized administrator account to manage airport operations.</p>
+      <div class="gate-cards">
+        <section class="gate-card gate-card-admin" aria-labelledby="gateAdminTitle">
+          <span class="gate-card-icon" data-icon="shield" data-size="26" aria-hidden="true"></span>
+          <span class="gate-card-eyebrow">FOR STAFF</span>
+          <strong id="gateAdminTitle">Operations Console</strong>
+          <span class="gate-card-text">Sign in with your administrator account to manage flights, passengers, queues, baggage and airport operations.</span>
+          <form id="adminLoginForm" class="gate-form" novalidate>
+            <label for="adminUsername">Admin username
+              <input class="auth-login-input" id="adminUsername" name="username" type="text" placeholder="e.g. aerostruct.admin" maxlength="80" autocomplete="username" required>
+            </label>
+            <label for="adminPassword">Password
+              <input class="auth-login-input" id="adminPassword" name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <p id="adminGateError" class="gate-error" role="alert" hidden></p>
+            <button class="button button-primary gate-submit" type="submit">Sign in to console <span data-icon="arrow" data-size="18" aria-hidden="true"></span></button>
+          </form>
+        </section>
+        <section class="gate-card gate-card-user" aria-labelledby="gateUserTitle">
+          <span class="gate-card-icon" data-icon="ticket" data-size="26" aria-hidden="true"></span>
+          <span class="gate-card-eyebrow">FOR PASSENGERS</span>
+          <strong id="gateUserTitle">Passenger Portal</strong>
+          <span class="gate-card-text">Sign in with the account provided by the airport operations desk to view your own journey, baggage and assistance.</span>
+          <form id="gateForm" class="gate-form" novalidate>
+            <label for="gateUsername">Passenger username
+              <input class="auth-login-input" id="gateUsername" name="username" type="text" placeholder="Your account username" maxlength="80" autocomplete="username" required>
+            </label>
+            <label for="gatePassword">Password
+              <input class="auth-login-input" id="gatePassword" name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <p id="gateError" class="gate-error" role="alert" hidden></p>
+            <button class="button button-secondary gate-submit" type="submit">Open my journey <span data-icon="arrow" data-size="18" aria-hidden="true"></span></button>
+          </form>
+        </section>
+      </div>
+      <p class="gate-foot"><i class="live-dot"></i> Secure account access · live data is loaded from the AeroStruct API</p>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN CONSOLE ============ -->
+  <div id="adminApp" class="app-shell admin-shell" hidden>
+    <div class="nav-backdrop" data-action="close-nav"></div>
+    <aside class="sidebar" id="adminSidebar">
+      <a class="brand" href="#dashboard" data-page="dashboard" aria-label="AeroStruct dashboard">
+        <span class="brand-mark" data-icon="plane" data-size="26" aria-hidden="true"></span>
+        <span><strong>AeroStruct</strong><small>Operations Console</small></span>
+      </a>
+      <div class="role-chip"><span data-icon="shield" data-size="16" aria-hidden="true"></span> Operations Admin</div>
+      <nav id="nav" aria-label="Main navigation"></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <div class="sidebar-note-head"><span class="live-dot"></span> Authenticated session</div>
+        <p>Operations are validated by the AeroStruct API and saved in MySQL.</p>
+      </div>
+      <button class="sidebar-switch" type="button" data-action="sign-out"><span data-icon="logout" data-size="18" aria-hidden="true"></span> Switch role</button>
+      <div class="sidebar-foot">AeroStruct <span>·</span> C++17 project</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-btn menu-toggle" type="button" data-action="toggle-nav" aria-label="Open menu"><span data-icon="menu" data-size="22" aria-hidden="true"></span></button>
+        <div class="breadcrumb"><span>Operations</span><span class="crumb-sep">/</span><strong id="breadcrumbCurrent">Dashboard</strong></div>
+        <div class="topbar-actions">
+          <span id="clock" class="clock-chip"></span>
+          <button class="button button-quiet" id="undoButton" type="button"><span data-icon="undo" data-size="16" aria-hidden="true"></span> Undo delete</button>
+          <button class="button button-secondary" id="resetButton" type="button"><span data-icon="reset" data-size="16" aria-hidden="true"></span> Reset demo</button>
+        </div>
+      </header>
+
+      <div id="pageHeading" class="page-heading"></div>
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="view">
+        <div id="nextDeparture" class="hero-card"></div>
+        <div class="stats-grid" id="stats"></div>
+        <div class="dashboard-grid">
+          <section class="panel departures-panel">
+            <div class="panel-heading"><div><span class="eyebrow"><i class="live-dot"></i> LIVE BOARD · DEMO DATA</span><h2>Departures</h2></div><span class="time-highlight" id="boardTime">--:--</span></div>
+            <div class="table-scroll"><table id="depTable" class="data-table"></table></div>
+          </section>
+          <section class="panel attention-panel">
+            <div class="panel-heading"><div><span class="eyebrow">OPERATIONAL FOLLOW-UP</span><h2>Needs attention</h2></div><span id="attentionCount" class="count-pill">0</span></div>
+            <div id="alerts" class="attention-list"></div>
+          </section>
+        </div>
+        <div class="dashboard-lower">
+          <div class="panel journey-panel">
+            <div class="panel-heading"><div><span class="eyebrow">PASSENGER FLOW</span><h2>Passenger journey snapshot</h2></div><button class="button button-outline" data-page="queues" type="button">Open queues →</button></div>
+            <div id="journeySnapshot" class="journey-snapshot"></div>
+          </div>
+          <div class="panel donut-panel">
+            <div class="panel-heading"><div><span class="eyebrow">FLIGHT STATUS</span><h2>Status mix</h2></div></div>
+            <div id="statusDonut" class="donut-wrap"></div>
+          </div>
+        </div>
+      </section>
+
+<!-- FLIGHTS -->
+      <section id="flights" class="view" hidden>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">OPERATIONS</span><h2>Add a flight</h2><p class="panel-subtitle">Flight numbers must be unique. Passenger registration is blocked for cancelled flights.</p></div></div>
+          <form id="flightForm" class="form-grid">
+            <label>Flight number<input id="fNo" name="flightNumber" placeholder="AI 202" required minlength="2" maxlength="12" pattern="[A-Za-z0-9 -]+" autocomplete="off"></label>
+            <label>Airline<input id="fAir" name="airline" placeholder="Air India" required maxlength="50"></label>
+            <label>Source<input id="fFrom" name="source" placeholder="Delhi" required maxlength="60"></label>
+            <label>Destination<input id="fTo" name="destination" placeholder="Mumbai" required maxlength="60"></label>
+            <label>Departure time<input id="fDep" name="departureTime" type="time" required></label>
+            <label>Arrival time<input id="fArr" name="arrivalTime" type="time" required></label>
+            <label>Gate<input id="fGate" name="gate" placeholder="G12" required maxlength="10"></label>
+            <label>Fare (INR)<input id="fFare" name="fare" type="number" min="0" step="0.01" placeholder="e.g. 5200" required></label>
+            <label>Initial status<select id="fStatus" name="status"><option>On Time</option><option>Boarding</option><option>Delayed</option></select></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">＋ Add flight</button><button class="button button-outline" type="reset">Clear form</button></div>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">FLIGHT DIRECTORY</span><h2>Manage flights</h2></div><span id="flightCount" class="count-pill">0 flights</span></div>
+          <div class="toolbar"><label class="search-field"><span>⌕</span><input id="fSearch" placeholder="Search flight, airline, route…" autocomplete="off"></label><label class="compact-label">Sort by<select id="fSort"><option value="dep">Departure time</option><option value="no">Flight number</option><option value="to">Destination</option><option value="fare">Fare (low to high)</option><option value="duration">Duration (shortest)</option></select></label></div>
+          <div class="table-scroll"><table id="flightTable" class="data-table"></table></div>
+        </section>
+      </section>
+
+      <!-- PASSENGERS -->
+      <section id="passengers" class="view" hidden>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">PASSENGER RECORDS · LINKED LIST</span><h2>Register passenger</h2><p class="panel-subtitle">IDs must be unique, age must be non-negative, and the selected flight must exist and not be cancelled.</p></div></div>
+          <form id="passengerForm" class="form-grid">
+            <label>Passenger ID<input id="pId" name="passengerId" placeholder="P101" required maxlength="20" pattern="[A-Za-z0-9_-]+" autocomplete="off"></label>
+            <label>Full name<input id="pName" name="name" placeholder="Passenger name" required minlength="2" maxlength="80" autocomplete="name"></label>
+            <label>Age<input id="pAge" name="age" type="number" min="0" max="120" step="1" placeholder="Age" required></label>
+            <label>Gender<select id="pGender" name="gender" required><option value="">Select gender</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select></label>
+            <label>Phone number<input id="pPhone" name="phone" type="tel" placeholder="+91 9876543210" required minlength="7" maxlength="16" pattern="[+0-9() -]{7,16}" autocomplete="tel"></label>
+            <label>Flight<select id="pFlight" name="flightNumber" required></select></label>
+            <label>Seat number<input id="pSeat" name="seatNumber" placeholder="12A" required maxlength="6" pattern="[A-Za-z0-9-]+"></label>
+            <label>Assistance type<select id="pAssist" name="assistanceType"><option>None</option><option>Emergency</option><option>Medical</option><option>Wheelchair</option><option>Accessibility</option><option>Elderly</option><option>VIP</option><option>Other</option></select></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">＋ Register passenger</button><button class="button button-outline" type="reset">Clear form</button></div>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">PASSENGER PORTAL ACCESS</span><h2>Create passenger login</h2><p class="panel-subtitle">An administrator creates a login for an existing passenger. Give the temporary password directly to that passenger.</p></div></div>
+          <form id="passengerAccountForm" class="form-grid">
+            <label>Passenger ID<input id="paPassengerId" name="passengerId" placeholder="P101" required maxlength="30" autocomplete="off"></label>
+            <label>Username<input id="paUsername" name="username" placeholder="e.g. passenger.p101" required minlength="3" maxlength="80" autocomplete="off"></label>
+            <label>Temporary password<input id="paPassword" name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">Create passenger login</button><button class="button button-outline" type="reset">Clear</button></div>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">PASSENGER DIRECTORY</span><h2>Passenger records</h2></div><span id="passengerCount" class="count-pill">0 passengers</span></div>
+          <div class="toolbar"><label class="search-field"><span>⌕</span><input id="pSearch" placeholder="Search ID, name or flight…" autocomplete="off"></label><label class="compact-label">Status<select id="pStatusFilter"><option value="all">All statuses</option><option>Registered</option><option>Checked-In</option><option>Security-Cleared</option><option>Boarded</option></select></label></div>
+          <div class="table-scroll"><table id="paxTable" class="data-table"></table></div>
+        </section>
+      </section>
+
+      <!-- CHECK-IN AND BOARDING -->
+      <section id="queues" class="view" hidden>
+        <div class="inline-notice"><strong>Passenger journey:</strong> Registered → Checked-In → Security-Cleared → Boarded. Check-in accepts only Registered passengers. After security clearance, the passenger is automatically added to the boarding queue. Unavailable flights are blocked.</div>
+        <div class="queue-grid journey-queue-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">QUEUE · FIFO</span><h2>Check-in</h2><p class="panel-subtitle">Register passengers into the queue, then process from the front.</p></div><span id="ciCount" class="count-pill">0 waiting</span></div>
+            <div class="panel-body"><div class="form-row"><label>Registered passenger<select id="ciSel"></select></label><button class="button button-primary align-end" id="ciJoin" type="button">Join queue</button></div><div id="ciList" class="queue-list"></div><div class="queue-footer"><p class="muted" id="ciWait"></p><button class="button button-primary" id="ciProcess" type="button">Process next passenger →</button></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">SECURITY CHECKPOINT</span><h2>Security clearance</h2><p class="panel-subtitle">Only Checked-In passengers can be cleared. Successful clearance automatically adds them to the boarding queue.</p></div></div>
+            <div class="panel-body"><div class="form-row"><label>Checked-in passenger<select id="scSel" required></select></label><label>Boarding gate<input id="scGate" placeholder="Auto-filled from flight" maxlength="10" required></label><button class="button button-primary align-end" id="scClear" type="button">Clear security</button></div><p class="muted" id="scHelp">Choose a passenger to load the flight's gate.</p></div>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">QUEUE · FIFO</span><div class="panel-heading">
+  <div>
+    <!-- <span class="eyebrow"></span> -->
+    <h2>Boarding</h2>
+    <p class="panel-subtitle">Passengers are automatically added after successful security clearance.</p>
+  </div>
+  <span id="boCount" class="count-pill">0 waiting</span>
+</div>
+
+<div class="panel-body"><p class="panel-subtitle">Passengers are automatically added after successful security clearance.</p>
+            <div class="panel-body">
+            <div id="boList" class="queue-list"></div>
+            <div class="queue-footer">
+            <p class="muted" id="boWait"></p>
+            <button class="button button-primary" id="boProcess" type="button">
+                  Board next passenger →
+            </button>
+             </div>
+            </div>
+          </section>
+        </div>
+        <section class="panel"><div class="panel-heading"><div><span class="eyebrow">STATUS SYNCHRONIZATION</span><h2>Passenger journey status</h2><p class="panel-subtitle">Registered → Checked-In → Security-Cleared → Boarded</p></div></div><div class="table-scroll"><table id="journeyTable" class="data-table"></table></div></section>
+      </section>
+
+      
+<!-- AEROASSIST -->
+<section id="priority" class="view" hidden>
+  <div class="inline-notice">
+    <strong>Priority convention:</strong>
+    1 is highest priority and 5 is normal.
+    Requests with equal priority retain FIFO order.
+    Recommendations are rule-based suggestions, not medical triage.
+  </div>
+
+  <!-- Assistance request and priority queue -->
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">AEROASSIST</span>
+          <h2>Add assistance request</h2>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <form id="priorityForm" class="form-grid single-column">
+          <label>
+            Registered passenger
+            <select id="prPassenger" required></select>
+          </label>
+
+          <label>
+            Priority
+            <select id="prType" required>
+              <option value="1">1 · Emergency</option>
+              <option value="2">2 · Medical Assistance</option>
+              <option value="3">3 · Wheelchair / Accessibility</option>
+              <option value="4">4 · VIP</option>
+              <option value="5">5 · Normal</option>
+            </select>
+          </label>
+
+          <label>
+            Request note
+            <input id="prReason" maxlength="140"
+              placeholder="e.g. wheelchair support at departure lounge">
+          </label>
+
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">
+              ＋ Add request
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">SORTED BY URGENCY</span>
+          <h2>Priority queue</h2>
+        </div>
+        <span id="prCount" class="count-pill">0 requests</span>
+      </div>
+
+      <div id="prList" class="queue-list"></div>
+
+      <div class="panel-body">
+        <button id="prProcess" class="button button-primary"
+          type="button">
+          Process highest priority →
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- C++ AeroAssist recommendation -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">INTELLIGENT ASSISTANCE · C++ API</span>
+        <h2>Assistance recommendations</h2>
+        <p class="panel-subtitle">
+          Get a recommended support team and action based on
+          the passenger's registered assistance requirement.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-row">
+        <label>
+          Passenger
+          <select id="asPax"></select>
+        </label>
+
+        <label>
+          Current location
+          <select id="asLoc"></select>
+        </label>
+      </div>
+
+            <div id="asOut"></div>
+    </div>
+  </section>
+
+  <!-- COMPLETED ASSISTANCE REQUEST HISTORY -->
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">AEROASSIST RECORDS</span>
+        <h2>Request History</h2>
+        <p class="panel-subtitle">
+          View assistance requests that have already been processed.
+        </p>
+      </div>
+
+      <span id="historyCount" class="count-pill">0 records</span>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-row">
+        <label>
+          Search by Passenger ID
+          <input
+            id="historyPassengerSearch"
+            type="text"
+            placeholder="e.g. T103"
+            autocomplete="off"
+          >
+        </label>
+
+        <div class="form-actions">
+          <button
+            id="refreshAssistanceHistory"
+            class="button button-outline"
+            type="button"
+          >
+            Refresh History
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table id="assistanceHistoryTable" class="data-table"></table>
+    </div>
+  </section>
+</section>
+
+
+
+      <!-- FAMILY AND GROUP TRAVEL ASSISTANCE -->
+      <section id="groups" class="view" hidden>
+        <div class="inline-notice"><strong>Group rules:</strong> each group has one active flight. A passenger must exist, be assigned to that same flight, and cannot belong to more than one group. Group counts are recalculated from the current passenger records.</div>
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">FAMILY & GROUP TRAVEL</span><h2>Create a group</h2><p class="panel-subtitle">Create a family or travel party against an active flight.</p></div></div>
+            <form id="groupCreateForm" class="form-grid group-form">
+              <label>Group ID<input id="gtGroupId" name="groupId" placeholder="G501" required maxlength="24" autocomplete="off"></label>
+              <label>Group name<input id="gtGroupName" name="groupName" placeholder="Sharma Family" required maxlength="80"></label>
+              <label>Flight<select id="gtFlight" name="flightNumber" required></select></label>
+              <div class="form-actions"><button class="button button-primary" type="submit">＋ Create group</button><button class="button button-outline" type="reset">Clear form</button></div>
+            </form>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">GROUP MEMBERS</span><h2>Add passenger to group</h2><p class="panel-subtitle">Passengers can only be added to a group on their assigned flight.</p></div></div>
+            <form id="groupAddForm" class="form-grid group-form">
+              <label>Group<select id="gtTargetGroup" name="groupId" required></select></label>
+              <label>Passenger<select id="gtPassenger" name="passengerId" required></select></label>
+              <div class="form-actions"><button class="button button-primary" type="submit">＋ Add passenger</button></div>
+            </form>
+          </section>
+        </div>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">LIVE GROUP STATUS</span><h2>Family & group overview</h2><p class="panel-subtitle">Checked-in counts include Checked-In, Security-Cleared and Boarded passengers. Pending is the number still awaiting check-in.</p></div><span id="groupCount" class="count-pill">0 groups</span></div>
+          <div id="groupList" class="group-status-grid"></div>
+        </section>
+      </section>
+
+      <!-- SMART FLIGHT SUGGESTIONS -->
+      <section id="suggestions" class="view" hidden>
+        <section class="panel"><div class="panel-heading"><div><span class="eyebrow">SMART FLIGHT SUGGESTIONS</span><h2>Alternative flight finder</h2><p class="panel-subtitle">Alternatives on the same route are ranked using a 50/50 score: lower fare and shorter flight duration. Cancelled and completed flights are excluded.</p></div></div><div class="panel-body"><div class="form-row"><label>Selected flight<select id="suggestFlight"></select></label><button class="button button-primary align-end" id="findSuggestions" type="button">Find alternatives</button></div><div id="suggestOut" class="suggestion-list"></div></div></section>
+      </section>
+
+      
+      <!-- AIRPORT NAVIGATOR -->
+      <section id="navigator" class="view" hidden>
+        <section class="panel nav-card">
+          <div class="nav-card-head">
+            <div class="nav-card-title"><span class="nav-card-icon" data-icon="compass" data-size="22" aria-hidden="true"></span><div><span class="eyebrow">GRAPH · DIJKSTRA · BFS · DFS</span><h2>Airport Navigator</h2></div></div>
+            <div class="nav-controls">
+              <label class="nav-select"><span>Airport:</span><select id="navAirport"></select></label>
+              <label class="nav-select"><span>From:</span><select id="navFrom"></select></label>
+              <label class="nav-select"><span>To:</span><select id="navTo"></select></label>
+              <button id="navFind" class="button button-secondary nav-find" type="button">Find Route</button>
+            </div>
+          </div>
+          <div class="nav-card-body">
+            <div class="nav-map-col">
+              <div class="map-wrap nav-map"><svg id="map" viewBox="0 0 860 410" role="img" aria-label="Illustrative airport terminal floor plan"></svg></div>
+              <div class="nav-shortcuts"><span class="nav-hint">Tap a location on the map to set it as your destination. Distances are illustrative.</span><div class="button-row"><button id="navMedical" class="button button-outline" type="button">Emergency: Medical Centre</button><button id="navBfs" class="button button-outline" type="button">BFS traversal</button><button id="navDfs" class="button button-outline" type="button">DFS traversal</button></div></div>
+            </div>
+            <aside class="nav-info" aria-label="Route information">
+              <h3 class="nav-info-title"><span data-icon="radar" data-size="18" aria-hidden="true"></span> Route Information</h3>
+              <div id="navOut" class="route-result" aria-live="polite"></div>
+              <button id="navStart" class="button button-primary nav-start" type="button"><span data-icon="send" data-size="18" aria-hidden="true"></span> Start Navigation</button>
+            </aside>
+          </div>
+        </section>
+      </section>
+
+      <!-- EMERGENCY ASSISTANCE -->
+      <section id="emergency" class="view" hidden>
+        <div class="inline-notice emergency-notice"><strong>Emergency demo mode:</strong> This module records simulated incidents and uses illustrative airport locations and walking times. It does not contact emergency services. For real incidents, contact airport emergency staff immediately.</div>
+        <!-- EMERGENCY QUICK HELP -->
+<section class="panel emergency-quick-help">
+  <div class="panel-heading">
+    <div>
+      <span class="eyebrow">IMMEDIATE HELP</span>
+      <h2>Emergency Quick Help</h2>
+      <p class="panel-subtitle">
+        Find nearby hospitals and view general first-aid guidance
+        for different emergencies.
+      </p>
+    </div>
+  </div>
+
+  <div class="emergency-quick-help-body">
+    <div class="emergency-help-warning">
+      <strong>Life-threatening emergency?</strong>
+      Call emergency services first. Do not delay urgent help
+      to use this website.
+    </div>
+
+    <div class="emergency-help-actions">
+      <a class="button button-primary" href="tel:112">
+        Call 112 — India
+      </a>
+
+      <button
+        id="emFindHospitals"
+        class="button button-outline"
+        type="button">
+        Find Nearby Hospitals
+      </button>
+    </div>
+
+    <div class="form-row emergency-map-row">
+      <label>
+        City, area or PIN code (optional)
+        <input
+          id="emHospitalArea"
+          type="text"
+          maxlength="100"
+          placeholder="e.g. Dehradun or 248001">
+      </label>
+      <p class="muted">
+        Leave this blank to search for hospitals near your
+        current location in Google Maps.
+      </p>
+    </div>
+
+    <div class="form-row emergency-guide-row">
+      <label>
+        Select emergency type
+        <select id="emHelpType">
+          <option value="general">General medical emergency</option>
+          <option value="stroke">Possible stroke</option>
+          <option value="choking">Choking</option>
+          <option value="bleeding">Severe bleeding</option>
+          <option value="burns">Burns</option>
+          <option value="seizure">Seizure</option>
+          <option value="fire">Fire or smoke</option>
+          <option value="security">Security threat</option>
+          <option value="missing">Missing or separated person</option>
+        </select>
+      </label>
+    </div>
+
+    <div
+      id="emFirstAidAdvice"
+      class="emergency-first-aid"
+      aria-live="polite">
+    </div>
+
+    <p class="hint emergency-help-disclaimer">
+      This is general educational guidance, not a diagnosis or
+      substitute for professional emergency instructions.
+      Follow the emergency operator's directions.
+    </p>
+  </div>
+</section>
+        <section class="panel emergency-register-panel">
+          <div class="panel-heading"><div><span class="eyebrow">INCIDENT INTAKE</span><h2>Register emergency case</h2><p class="panel-subtitle">Create an incident record, identify affected passengers, and set its operator-assessed severity.</p></div></div>
+          <form id="emergencyForm" class="form-grid emergency-form">
+            <label>Primary registered passenger<select id="emPrimaryPassenger" name="primaryPassengerId" required></select></label>
+            <label>Emergency type<select id="emType" name="emergencyType" required>
+              <option value="">Choose emergency type</option>
+              <option value="Medical Emergency">Medical Emergency</option>
+              <option value="Fire / Smoke">Fire / Smoke</option>
+              <option value="Security Threat">Security Threat</option>
+              <option value="Missing / Separated Passenger">Missing / Separated Passenger</option>
+              <option value="Other Emergency">Other Emergency</option>
+            </select></label>
+            <label>Severity<select id="emSeverity" name="severity" required>
+              <option value="">Choose severity</option>
+              <option value="1">Critical — highest priority</option>
+              <option value="2">High</option>
+              <option value="3">Moderate</option>
+            </select><span class="hint">Set by the operator; not automated medical triage.</span></label>
+            <label>Incident location<select id="emLocation" name="incidentLocation" required></select></label>
+            <label class="emergency-description-field">Incident description<textarea id="emDescription" name="description" rows="3" minlength="3" maxlength="300" required placeholder="Describe what happened (3–300 characters)"></textarea><span class="hint">Required, 3–300 characters.</span></label>
+            <label class="emergency-affected-field">Additional affected passengers (optional)<select id="emAffectedPassengers" name="affectedPassengers" multiple size="5" aria-describedby="emAffectedHelp"></select><span class="hint" id="emAffectedHelp">The primary passenger is included automatically. Select up to 20 additional registered passengers (Ctrl/Cmd-click to select multiple).</span></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">＋ Register emergency</button><button class="button button-outline" type="reset">Clear form</button></div>
+          </form>
+        </section>
+        <section class="panel emergency-incidents-panel">
+          <div class="panel-heading"><div><span class="eyebrow">SEVERITY-ORDERED INCIDENT REGISTER</span><h2>Emergency incident register</h2><p class="panel-subtitle">Critical cases appear first; cases with the same severity retain registration order. Update each case as the response progresses.</p></div><span id="emergencyCount" class="count-pill">0 cases</span></div>
+          <div class="toolbar emergency-toolbar">
+            <label class="search-field"><span>⌕</span><input id="emergencySearch" type="search" placeholder="Search case, passenger, type or location…"></label>
+            <label class="compact-label">Status<select id="emergencyStatusFilter"><option value="all">All cases</option><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option></select></label>
+          </div>
+          <div id="emergencyList" class="emergency-list" aria-live="polite"></div>
+        </section>
+      </section>
+
+      
+<!-- BAGGAGE MANAGEMENT -->
+<section id="baggage" class="view" hidden>
+
+  <div class="inline-notice baggage-notice">
+    <strong>Baggage operations:</strong>
+    Track baggage through registration, loading, arrival and collection.
+    Records are retrieved from and saved to MySQL through the authenticated API.
+  </div>
+
+  <!-- Baggage Summary -->
+  <div class="baggage-summary-grid">
+    <div class="panel baggage-summary-card">
+      <span class="eyebrow">TOTAL BAGS</span>
+      <strong id="baggageTotal">0</strong>
+      <span>Registered baggage</span>
+    </div>
+
+    <div class="panel baggage-summary-card">
+      <span class="eyebrow">IN QUEUE</span>
+      <strong id="baggageQueued">0</strong>
+      <span>Awaiting handling</span>
+    </div>
+
+    <div class="panel baggage-summary-card">
+      <span class="eyebrow">IN TRANSIT</span>
+      <strong id="baggageLoaded">0</strong>
+      <span>Loaded baggage</span>
+    </div>
+
+    <div class="panel baggage-summary-card">
+      <span class="eyebrow">OPEN ISSUES</span>
+      <strong id="baggageIssues">0</strong>
+      <span>Issues requiring attention</span>
+    </div>
+  </div>
+
+  <!-- Register Baggage -->
+  <section class="panel baggage-register-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">BAGGAGE INTAKE</span>
+        <h2>Register baggage</h2>
+        <p class="panel-subtitle">
+          Assign baggage to a registered passenger and flight.
+        </p>
+      </div>
+    </div>
+
+    <form id="baggageForm" class="form-grid baggage-form">
+
+      <label>
+        Passenger
+        <select id="baggagePassenger" required>
+          <option value="">Select passenger</option>
+        </select>
+      </label>
+
+      <label>
+        Flight
+        <select id="baggageFlight" required>
+          <option value="">Select flight</option>
+        </select>
+      </label>
+
+      <label>
+        Baggage weight (kg)
+        <input
+          id="baggageWeight"
+          type="number"
+          min="0.1"
+          max="50"
+          step="0.1"
+          required
+          placeholder="e.g. 15.5">
+        <span class="hint">Demonstration limit: 0.1–50 kg.</span>
+      </label>
+
+      <label>
+        Baggage description
+        <input
+          id="baggageDescription"
+          type="text"
+          maxlength="100"
+          required
+          placeholder="e.g. Black suitcase">
+      </label>
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit">
+          + Register baggage
+        </button>
+        <button class="button button-outline" type="reset">
+          Clear form
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+  <!-- Baggage Handling Queue -->
+  <section class="panel baggage-queue-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">FIFO PROCESSING</span>
+        <h2>Baggage handling queue</h2>
+        <p class="panel-subtitle">
+          Process bags in the order they entered the queue.
+        </p>
+      </div>
+
+      <button
+        id="baggageProcessNext"
+        class="button button-primary"
+        type="button">
+        Process next bag
+      </button>
+    </div>
+
+    <div
+      id="baggageQueueList"
+      class="baggage-queue"
+      aria-live="polite">
+    </div>
+  </section>
+
+  <!-- Baggage Records -->
+  <section class="panel baggage-records-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">BAGGAGE REGISTER</span>
+        <h2>Track baggage</h2>
+        <p class="panel-subtitle">
+          Search records and manage baggage status.
+        </p>
+      </div>
+
+      <span id="baggageCount" class="count-pill">0 bags</span>
+    </div>
+
+    <div class="toolbar baggage-toolbar">
+      <label class="search-field">
+        <span>⌕</span>
+        <input
+          id="baggageSearch"
+          type="search"
+          placeholder="Search tag, passenger or flight...">
+      </label>
+
+      <label class="compact-label">
+        Status
+        <select id="baggageStatusFilter">
+          <option value="all">All baggage</option>
+          <option value="Registered">Registered</option>
+          <option value="Loaded">Loaded</option>
+          <option value="Arrived">Arrived</option>
+          <option value="Collected">Collected</option>
+          <option value="On Hold">On Hold</option>
+        </select>
+      </label>
+    </div>
+
+    <div
+      id="baggageList"
+      class="baggage-list"
+      aria-live="polite">
+    </div>
+  </section>
+
+  <!-- Report Baggage Issue -->
+  <section class="panel baggage-issue-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">BAGGAGE SUPPORT</span>
+        <h2>Report a baggage issue</h2>
+        <p class="panel-subtitle">
+          Record delayed, missing, damaged or other baggage issues.
+        </p>
+      </div>
+    </div>
+
+    <form id="baggageIssueForm" class="form-grid baggage-form">
+
+      <label>
+        Baggage tag
+        <select id="baggageIssueTag" required>
+          <option value="">Select baggage tag</option>
+        </select>
+      </label>
+
+      <label>
+        Issue type
+        <select id="baggageIssueType" required>
+          <option value="">Select issue type</option>
+          <option value="Delayed">Delayed</option>
+          <option value="Missing">Missing</option>
+          <option value="Damaged">Damaged</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+
+      <label class="baggage-description-field">
+        Issue description
+        <textarea
+          id="baggageIssueDescription"
+          rows="3"
+          maxlength="200"
+          required
+          placeholder="Describe the baggage problem..."></textarea>
+      </label>
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit">
+          Report issue
+        </button>
+      </div>
+
+    </form>
+
+    <div
+      id="baggageIssueList"
+      class="baggage-list"
+      aria-live="polite">
+    </div>
+  </section>
+
+</section>
+<!-- END BAGGAGE MANAGEMENT -->
+
+
+      <!-- NOTIFICATIONS -->
+      <section id="notes" class="view" hidden>
+        <section class="panel connection-risk-panel">
+          <div class="panel-heading"><div><span class="eyebrow">CONNECTION RISK DETECTION</span><h2>Check a connecting journey</h2><p class="panel-subtitle">Compares arrival time + estimated transfer time with the next departure. A risk alert is added to notification history when the remaining buffer is below the configured minimum.</p></div></div>
+          <form id="connectionRiskForm" class="form-grid">
+            <label>Passenger<select id="crPassenger" required></select></label>
+            <label>Arriving flight<select id="crArrFlight" required></select></label>
+            <label>Arrival time<input id="crArrivalTime" type="time" required></label>
+            <label>Estimated transfer (minutes)<input id="crTransfer" type="number" min="0" max="1440" step="1" value="30" required></label>
+            <label>Connecting flight<select id="crNextFlight" required></select></label>
+            <label>Next departure<input id="crNextDeparture" type="time" required></label>
+            <label>Minimum buffer (minutes)<input id="crMinBuffer" type="number" min="0" max="1440" step="1" value="30" required></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">Check connection risk</button></div>
+          </form>
+          <div id="connectionRiskResult" class="connection-risk-result" aria-live="polite"></div>
+        </section>
+        <section class="panel"><div class="panel-heading"><div><span class="eyebrow">PERSONALIZED NOTIFICATION HISTORY</span><h2>Notifications</h2><p class="panel-subtitle">Simulated in-app notices: no SMS, email or push message is sent.</p></div><button id="markAllRead" class="button button-outline" type="button">Mark all read</button></div><div class="toolbar"><label class="search-field"><span>⌕</span><input id="noteSearch" placeholder="Search passenger or message…"></label><label class="compact-label">Show<select id="noteFilter"><option value="all">All notices</option><option value="unread">Unread only</option><option value="read">Read only</option></select></label></div><div id="noteList" class="notification-list"></div></section>
+      </section>
+
+      <footer class="main-footer"><span>AeroStruct · Airport Management System</span><span>Authenticated API session <i class="live-dot"></i></span></footer>
+    </main>
+  </div>
+
+  <!-- ============ PASSENGER PORTAL ============ -->
+  <div id="userApp" class="app-shell user-shell" hidden>
+    <div class="nav-backdrop" data-action="close-nav"></div>
+    <aside class="sidebar user-sidebar" id="userSidebar">
+      <a class="brand" href="#trip" data-upage="trip" aria-label="AeroStruct passenger portal home">
+        <span class="brand-mark" data-icon="plane" data-size="26" aria-hidden="true"></span>
+        <span><strong>AeroStruct</strong><small>Passenger Portal</small></span>
+      </a>
+      <div class="user-card" id="uUserCard"></div>
+      <nav id="uNav" aria-label="Passenger navigation"></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <div class="sidebar-note-head"><span class="live-dot"></span> Need help?</div>
+        <p>Visit the Information &amp; Help Desk, or open Emergency Help for urgent support.</p>
+      </div>
+      <button class="sidebar-switch" type="button" data-action="sign-out"><span data-icon="logout" data-size="18" aria-hidden="true"></span> Sign out</button>
+      <div class="sidebar-foot">AeroStruct <span>·</span> Passenger demo</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-btn menu-toggle" type="button" data-action="toggle-nav" aria-label="Open menu"><span data-icon="menu" data-size="22" aria-hidden="true"></span></button>
+        <div class="breadcrumb"><span>Passenger</span><span class="crumb-sep">/</span><strong id="uBreadcrumb">My Trip</strong></div>
+        <div class="topbar-actions">
+          <span id="uClock" class="clock-chip"></span>
+          <button class="icon-btn bell-btn" type="button" data-upage="notes" aria-label="Open notifications"><span data-icon="bell" data-size="20" aria-hidden="true"></span><span class="bell-badge" id="uBell" hidden>0</span></button>
+          <button class="button button-outline" type="button" data-action="sign-out"><span data-icon="logout" data-size="16" aria-hidden="true"></span> Sign out</button>
+        </div>
+      </header>
+
+      <div id="uPageHeading" class="page-heading"></div>
+
+      <!-- MY TRIP -->
+      <section id="uTrip" class="uview">
+        <div id="uPass"></div>
+        <div class="u-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">YOUR JOURNEY</span><h2>Where you are right now</h2></div><span id="uJourneyBadge"></span></div>
+            <div class="panel-body" id="uJourney"></div>
+          </section>
+          <div class="u-side" id="uSide"></div>
+        </div>
+      </section>
+
+      <!-- MY BAGGAGE -->
+      <section id="uBaggage" class="uview" hidden>
+        <div class="baggage-summary-grid" id="uBagSummary"></div>
+        <div class="u-grid u-grid-even">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">BAGGAGE INTAKE</span><h2>Register a bag</h2><p class="panel-subtitle" id="uBagHint">Baggage is registered against your own flight.</p></div></div>
+            <form id="uBagForm" class="form-grid single-column u-form">
+              <label>Flight<input id="uBagFlight" type="text" readonly tabindex="-1"></label>
+              <label>Baggage weight (kg)<input id="uBagWeight" type="number" min="0.1" max="50" step="0.1" required placeholder="e.g. 15.5"><span class="hint">Demonstration limit: 0.1–50 kg.</span></label>
+              <label>Baggage description<input id="uBagDesc" type="text" maxlength="100" required placeholder="e.g. Black suitcase"></label>
+              <div class="form-actions"><button class="button button-primary" type="submit">+ Register baggage</button><button class="button button-outline" type="reset">Clear form</button></div>
+            </form>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">BAGGAGE SUPPORT</span><h2>Report a baggage issue</h2><p class="panel-subtitle">Record delayed, missing, damaged or other baggage issues.</p></div></div>
+            <form id="uBagIssueForm" class="form-grid single-column u-form">
+              <label>Baggage tag<select id="uBagIssueTag" required></select></label>
+              <label>Issue type<select id="uBagIssueType" required><option value="">Select issue type</option><option value="Delayed">Delayed</option><option value="Missing">Missing</option><option value="Damaged">Damaged</option><option value="Other">Other</option></select></label>
+              <label>Issue description<textarea id="uBagIssueDesc" rows="3" maxlength="200" required placeholder="Describe the baggage problem..."></textarea></label>
+              <div class="form-actions"><button class="button button-primary" type="submit">Report issue</button></div>
+            </form>
+          </section>
+        </div>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">TRACK BAGGAGE</span><h2>My bags</h2></div><span id="uBagCount" class="count-pill">0 bags</span></div>
+          <div id="uBagList" class="baggage-list"></div>
+        </section>
+      </section>
+
+      <!-- FLIGHTS & OPTIONS -->
+      <section id="uFlights" class="uview" hidden>
+        <div id="uFlightSummary"></div>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">SMART FLIGHT SUGGESTIONS</span><h2>Alternatives on your route</h2><p class="panel-subtitle">Alternatives on the same route are ranked using a 50/50 score: lower fare and shorter flight duration. Cancelled and completed flights are excluded.</p></div></div>
+          <div class="panel-body"><div id="uSuggestOut" class="suggestion-list"></div></div>
+        </section>
+        <section class="panel departures-panel">
+          <div class="panel-heading"><div><span class="eyebrow"><i class="live-dot"></i> LIVE BOARD · DEMO DATA</span><h2>All departures</h2></div></div>
+          <div class="table-scroll"><table id="uDepTable" class="data-table"></table></div>
+        </section>
+      </section>
+
+      <!-- ASSISTANCE -->
+      <section id="uAssist" class="uview" hidden>
+        <div class="u-grid u-grid-even">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">PASSENGER SERVICE</span><h2>AeroAssist</h2><p class="panel-subtitle">Advice is based on your registered assistance type and journey status.</p></div></div>
+            <div class="panel-body"><div class="form-row"><label>Current location<select id="uAsLoc"></select></label></div><div id="uAsOut"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">AEROASSIST</span><h2>Request assistance</h2><p class="panel-subtitle">1 is highest priority and 5 is normal. Requests with equal priority keep their arrival order.</p></div></div>
+            <div class="panel-body">
+              <div id="uPrStatus"></div>
+              <form id="uPrForm" class="form-grid single-column u-form">
+                <label>Priority<select id="uPrType" required><option value="1">1 · Emergency</option><option value="2">2 · Medical Assistance</option><option value="3">3 · Wheelchair / Accessibility</option><option value="4">4 · VIP</option><option value="5" selected>5 · Normal</option></select></label>
+                <label>Request note<input id="uPrReason" maxlength="140" placeholder="e.g. wheelchair support at departure lounge"></label>
+                <div class="form-actions"><button class="button button-primary" type="submit">+ Add request</button></div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- NAVIGATOR -->
+      <section id="uNavigator" class="uview" hidden>
+        <section class="panel nav-card">
+          <div class="nav-card-head">
+            <div class="nav-card-title"><span class="nav-card-icon" data-icon="compass" data-size="22" aria-hidden="true"></span><div><span class="eyebrow">GRAPH · DIJKSTRA · BFS · DFS</span><h2>Airport Navigator</h2></div></div>
+            <div class="nav-controls">
+              <label class="nav-select"><span>Airport:</span><select id="uNavAirport"></select></label>
+              <label class="nav-select"><span>From:</span><select id="uNavFrom"></select></label>
+              <label class="nav-select"><span>To:</span><select id="uNavTo"></select></label>
+              <button id="uNavFind" class="button button-secondary nav-find" type="button">Find Route</button>
+            </div>
+          </div>
+          <div class="nav-card-body">
+            <div class="nav-map-col">
+              <div class="map-wrap nav-map"><svg id="uMap" viewBox="0 0 860 410" role="img" aria-label="Illustrative airport terminal floor plan"></svg></div>
+              <div class="nav-shortcuts"><span class="nav-hint">Tap a location on the map to set it as your destination. Distances are illustrative.</span><div class="button-row"><button id="uNavGate" class="button button-outline" type="button">Route to my gate</button><button id="uNavMedical" class="button button-outline" type="button">Emergency: Medical Centre</button><button id="uNavBfs" class="button button-outline" type="button">BFS traversal</button><button id="uNavDfs" class="button button-outline" type="button">DFS traversal</button></div></div>
+            </div>
+            <aside class="nav-info" aria-label="Route information">
+              <h3 class="nav-info-title"><span data-icon="radar" data-size="18" aria-hidden="true"></span> Route Information</h3>
+              <div id="uNavOut" class="route-result" aria-live="polite"></div>
+              <button id="uNavStart" class="button button-primary nav-start" type="button"><span data-icon="send" data-size="18" aria-hidden="true"></span> Start Navigation</button>
+            </aside>
+          </div>
+        </section>
+      </section>
+
+      <!-- EMERGENCY HELP -->
+      <section id="uEmergency" class="uview" hidden>
+        <div class="inline-notice emergency-notice"><strong>Emergency demo mode:</strong> This portal records simulated incidents and uses illustrative airport locations. It does not contact emergency services. For real incidents, call 112 or contact airport staff immediately.</div>
+        <section class="panel emergency-quick-help">
+          <div class="panel-heading"><div><span class="eyebrow">IMMEDIATE HELP</span><h2>Emergency Quick Help</h2><p class="panel-subtitle">Find nearby hospitals and view general first-aid guidance for different emergencies.</p></div></div>
+          <div class="emergency-quick-help-body">
+            <div class="emergency-help-warning"><strong>Life-threatening emergency?</strong> Call emergency services first. Do not delay urgent help to use this website.</div>
+            <div class="emergency-help-actions"><a class="button button-primary" href="tel:112">Call 112 — India</a><button id="uEmFindHospitals" class="button button-outline" type="button">Find Nearby Hospitals</button></div>
+            <div class="form-row emergency-map-row"><label>City, area or PIN code (optional)<input id="uEmHospitalArea" type="text" maxlength="100" placeholder="e.g. Dehradun or 248001"></label><p class="muted">Leave this blank to search for hospitals near your current location in Google Maps.</p></div>
+            <div class="form-row emergency-guide-row"><label>Select emergency type<select id="uEmHelpType"><option value="general">General medical emergency</option><option value="stroke">Possible stroke</option><option value="choking">Choking</option><option value="bleeding">Severe bleeding</option><option value="burns">Burns</option><option value="seizure">Seizure</option><option value="fire">Fire or smoke</option><option value="security">Security threat</option><option value="missing">Missing or separated person</option></select></label></div>
+            <div id="uEmFirstAid" class="emergency-first-aid" aria-live="polite"></div>
+            <p class="hint emergency-help-disclaimer">This is general educational guidance, not a diagnosis or substitute for professional emergency instructions. Follow the emergency operator's directions.</p>
+          </div>
+        </section>
+        <div class="u-grid u-grid-even">
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">ALERT AIRPORT STAFF</span><h2>Report an emergency</h2><p class="panel-subtitle">Creates an incident for the operations desk. Staff will review and reassess the severity.</p></div></div>
+            <form id="uEmForm" class="form-grid single-column u-form">
+              <label>Emergency type<select id="uEmType" required><option value="">Choose emergency type</option><option value="Medical Emergency">Medical Emergency</option><option value="Fire / Smoke">Fire / Smoke</option><option value="Security Threat">Security Threat</option><option value="Missing / Separated Passenger">Missing / Separated Passenger</option><option value="Other Emergency">Other Emergency</option></select></label>
+              <label>Where are you?<select id="uEmLocation" required></select></label>
+              <label>What happened?<textarea id="uEmDesc" rows="3" minlength="3" maxlength="300" required placeholder="Describe what happened (3–300 characters)"></textarea><span class="hint">Required, 3–300 characters.</span></label>
+              <div class="form-actions"><button class="button button-primary" type="submit">Alert staff</button><button class="button button-outline" type="reset">Clear form</button></div>
+            </form>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">YOUR REPORTS</span><h2>My emergency cases</h2></div><span id="uEmCount" class="count-pill">0 cases</span></div>
+            <div id="uEmList" class="emergency-list" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="uNotes" class="uview" hidden>
+        <section class="panel connection-risk-panel">
+          <div class="panel-heading"><div><span class="eyebrow">CONNECTION RISK DETECTION</span><h2>Check my connecting journey</h2><p class="panel-subtitle">Compares arrival time + estimated transfer time with the next departure. A risk alert is added to your notifications when the remaining buffer is below the configured minimum.</p></div></div>
+          <form id="uCrForm" class="form-grid">
+            <label>Arriving flight<select id="uCrArrFlight" required></select></label>
+            <label>Arrival time<input id="uCrArrivalTime" type="time" required></label>
+            <label>Estimated transfer (minutes)<input id="uCrTransfer" type="number" min="0" max="1440" step="1" value="30" required></label>
+            <label>Connecting flight<select id="uCrNextFlight" required></select></label>
+            <label>Next departure<input id="uCrNextDeparture" type="time" required></label>
+            <label>Minimum buffer (minutes)<input id="uCrMinBuffer" type="number" min="0" max="1440" step="1" value="30" required></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">Check connection risk</button></div>
+          </form>
+          <div id="uCrResult" class="connection-risk-result" aria-live="polite"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><span class="eyebrow">YOUR NOTIFICATION HISTORY</span><h2>Notifications</h2><p class="panel-subtitle">Simulated in-app notices: no SMS, email or push message is sent.</p></div><button id="uMarkAllRead" class="button button-outline" type="button">Mark all read</button></div>
+          <div class="toolbar"><label class="search-field"><span data-icon="search" data-size="16" aria-hidden="true"></span><input id="uNoteSearch" placeholder="Search your messages…"></label><label class="compact-label">Show<select id="uNoteFilter"><option value="all">All notices</option><option value="unread">Unread only</option><option value="read">Read only</option></select></label></div>
+          <div id="uNoteList" class="notification-list"></div>
+        </section>
+      </section>
+
+      <footer class="main-footer"><span>AeroStruct · Passenger Portal</span><span>Authenticated API session <i class="live-dot"></i></span></footer>
+    </main>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <script src="app.js"></script>
+  <script src="portal.js"></script>
+</body>
+</html>
