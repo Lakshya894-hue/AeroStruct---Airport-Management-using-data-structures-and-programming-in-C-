@@ -34,6 +34,123 @@ bool PriorityQueue::isEmpty() const
     return front == nullptr;
 }
 
+
+// Check whether a passenger already has an active request.
+bool PriorityQueue::containsPassenger(
+    const std::string& passengerId
+) const
+{
+    Node* current = front;
+
+    while (current != nullptr)
+    {
+        if (current->passenger.getPassengerId() == passengerId)
+            return true;
+
+        current = current->next;
+    }
+
+    return false;
+}
+
+
+// Insert according to priority.
+// Lower priority numbers represent higher priority.
+// Equal priorities retain FIFO ordering.
+bool PriorityQueue::enqueueRecord(
+    const Passenger& passenger,
+    int priority,
+    const std::string& reason
+)
+{
+    if (passenger.getPassengerId().empty() ||
+        priority < 1 || priority > 5 ||
+        containsPassenger(passenger.getPassengerId()))
+    {
+        return false;
+    }
+
+    Node* newNode = new Node(passenger, priority, reason);
+
+    if (front == nullptr || priority < front->priority)
+    {
+        newNode->next = front;
+        front = newNode;
+    }
+    else
+    {
+        Node* current = front;
+
+        while (current->next != nullptr &&
+               current->next->priority <= priority)
+        {
+            current = current->next;
+        }
+
+        newNode->next = current->next;
+        current->next = newNode;
+    }
+
+    ++size;
+    return true;
+}
+
+
+// Remove the highest-priority passenger.
+bool PriorityQueue::dequeueRecord(
+    Passenger& passenger,
+    int& priority,
+    std::string& reason
+)
+{
+    if (isEmpty())
+        return false;
+
+    Node* temp = front;
+
+    passenger = temp->passenger;
+    priority = temp->priority;
+    reason = temp->reason;
+
+    front = front->next;
+
+    delete temp;
+    --size;
+
+    return true;
+}
+
+
+// Return the number of active assistance requests.
+std::size_t PriorityQueue::getQueueSize() const
+{
+    return size;
+}
+
+
+// Retrieve a request at a specified position.
+bool PriorityQueue::getPassengerAt(
+    std::size_t index,
+    Passenger& passenger,
+    int& priority,
+    std::string& reason
+) const
+{
+    if (index >= size)
+        return false;
+
+    Node* current = front;
+
+    for (std::size_t i = 0; i < index; ++i)
+        current = current->next;
+
+    passenger = current->passenger;
+    priority = current->priority;
+    reason = current->reason;
+
+    return true;
+}
+
 // Add passenger according to priority
 // Add a registered passenger according to priority.
 void PriorityQueue::enqueue(
@@ -284,3 +401,6 @@ int PriorityQueue::removePassengersByFlightNumber(const std::string& flightNumbe
 
     return removedCount;
 }
+
+ 
+   
