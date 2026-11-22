@@ -3,6 +3,8 @@
 const STORAGE_KEY = 'aerostruct-validated-ops-v1';
 // AeroStruct C++ backend API
 const API_BASE_URL = 'http://127.0.0.1:8080/api';
+const DEBUG_LOGS = false;
+const debugLog = (...args) => { if (DEBUG_LOGS) console.log(...args); };
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -57,6 +59,10 @@ const ICON_PATHS = {
   search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
   gate: '<path d="M4 21V4h12l4 4v13"/><path d="M2 21h20"/><path d="M9 21v-6h6v6"/>',
   medical: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  command: '<path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>',
+  wifiOff: '<path d="m2 2 20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.8a15 15 0 0 1 4.2-2.6"/><path d="M10.7 5.1A15 15 0 0 1 22 8.8"/><path d="M5 12.9a10 10 0 0 1 5.2-2.8"/><path d="M16.9 11a10 10 0 0 1 2.1 1.9"/><path d="M12 20h.01"/>',
   hospital: '<path d="M3 21V8l9-5 9 5v13"/><path d="M12 10v6M9 13h6"/><path d="M9 21v-3h6v3"/>',
   send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
   radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/>'
@@ -139,17 +145,37 @@ function flightArcSvg() {
     : `<g class="hb-plane" transform="translate(470 38) rotate(18)"><use href="#plane-glyph"/></g>`;
   return `<svg class="hb-arc" viewBox="0 0 640 180" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false"><path id="${id}" class="hb-arc-line" d="M20 150 C 170 8, 400 4, 620 112"/><g class="hb-radar" transform="translate(620 112)"><circle r="5"/><circle class="ring r1" r="5"/><circle class="ring r2" r="5"/></g><g class="hb-radar" transform="translate(20 150)"><circle r="4"/><circle class="ring r1" r="4"/></g>${plane}</svg>`;
 }
+// Every page gets a photo banner; each banner slowly crossfades through a
+// short playlist of aviation photos (enhance.js advances the slides).
 const BANNER_SCENES = {
-  dashboard: { photo: 'dash', pos: '50% 58%' },
-  priority: { photo: 'assist', pos: '50% 42%' },
-  baggage: { photo: 'track', pos: '50% 62%' },
-  navigator: { photo: 'nav', pos: '50% 55%' },
-  trip: { photo: 'dash', pos: '50% 58%' }
+  dashboard: { photos: ['dash', 'hero1', 'hero2', 'strip'], pos: '50% 58%' },
+  flights: { photos: ['strip', 'hero2', 'hero4'], pos: '50% 55%' },
+  passengers: { photos: ['assist', 'hero1', 'about'], pos: '50% 45%' },
+  queues: { photos: ['assist', 'strip', 'hero1'], pos: '50% 45%' },
+  priority: { photos: ['assist', 'about', 'hero3'], pos: '50% 42%' },
+  groups: { photos: ['hero3', 'assist', 'track'], pos: '50% 50%' },
+  suggestions: { photos: ['track', 'hero4', 'hero2'], pos: '50% 55%' },
+  navigator: { photos: ['nav', 'hero1', 'about'], pos: '50% 55%' },
+  emergency: { photos: ['about', 'nav', 'hero1'], pos: '50% 50%' },
+  baggage: { photos: ['track', 'strip', 'hero4'], pos: '50% 62%' },
+  notes: { photos: ['hero2', 'track', 'dash'], pos: '50% 55%' },
+  trip: { photos: ['dash', 'track', 'hero2', 'hero4'], pos: '50% 58%' },
+  assist: { photos: ['assist', 'about', 'hero3'], pos: '50% 42%' }
 };
+const BANNER_SLIDE_MS = 7000;
 function bannerHtml(page, inner) {
   const scene = BANNER_SCENES[page];
   if (!scene) return inner;
-  return `<div class="heading-banner" data-photo-box style="--pos:${scene.pos}"><div class="hb-media" aria-hidden="true">${photoImg(scene.photo, { widths: [640, 1100, 1700], sizes: '(min-width: 961px) calc(100vw - 258px), 100vw', lazy: false })}</div><div class="hb-shade" aria-hidden="true"></div>${flightArcSvg()}<div class="hb-content">${inner}</div></div>`;
+  const photos = scene.photos || [scene.photo];
+  // Derive the active slide from the clock so re-renders don't restart the show.
+  const active = Math.floor(Date.now() / BANNER_SLIDE_MS) % photos.length;
+  const slides = photos.map((key, index) => photoImg(key, {
+    widths: [640, 1100, 1700],
+    sizes: '(min-width: 961px) calc(100vw - 258px), 100vw',
+    lazy: index !== active,
+    cls: `hb-slide${index === active ? ' is-active' : ''}`
+  })).join('');
+  return `<div class="heading-banner" data-photo-box style="--pos:${scene.pos}"><div class="hb-media" aria-hidden="true">${slides}</div><div class="hb-shade" aria-hidden="true"></div><div class="hb-clouds" aria-hidden="true"></div>${flightArcSvg()}<div class="hb-content">${inner}</div></div>`;
 }
 
 /* ---------- Illustrated terminal floor plan (same graph, same coordinates) ---------- */
@@ -359,7 +385,7 @@ async function loadAirportDirectoryFromApi() {
 
     await loadAirportGraphFromApi(preferredAirport);
 
-    console.log(
+    debugLog(
       `Loaded ${availableAirports.length} airports successfully.`
     );
 
@@ -480,7 +506,7 @@ async function loadAirportGraphFromApi(airportCode) {
       })
     );
 
-    console.log(
+    debugLog(
       `Airport graph loaded: ${code} | ` +
       `${data.locations.length} locations | ${data.edges.length} paths`
     );
@@ -723,7 +749,7 @@ async function loadFlightsFromApi() {
     // Refresh the existing dashboard and flight directory.
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.flights.length} flights from MySQL.`
     );
 
@@ -771,7 +797,7 @@ async function loadPassengersFromApi() {
     // Refresh passenger management and dependent modules.
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.passengers.length} passengers from MySQL.`
     );
 
@@ -855,7 +881,7 @@ async function loadBaggageFromApi() {
 
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.baggageRecords.length} baggage records from MySQL.`
     );
 
@@ -960,7 +986,7 @@ async function loadGroupsFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.groups.length} travel groups from MySQL.`
     );
 
@@ -1012,7 +1038,7 @@ async function loadCheckInQueueFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.checkinQ.length} check-in queue entries from MySQL.`
     );
 
@@ -1055,7 +1081,7 @@ async function loadBoardingQueueFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.boardQ.length} Boarding Queue entries from MySQL.`
     );
 
@@ -1115,7 +1141,7 @@ async function loadPriorityQueueFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.priorityQ.length} Priority Queue entries from MySQL.`
     );
 
@@ -1187,7 +1213,7 @@ async function loadEmergencyCasesFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.emergencyCases.length} emergency cases from MySQL.`
     );
 
@@ -1311,7 +1337,7 @@ async function loadNotificationsFromApi() {
     saveState();
     renderAll();
 
-    console.log(
+    debugLog(
       `Successfully loaded ${state.notifications.length} notifications from MySQL.`
     );
 
@@ -1374,6 +1400,11 @@ function statusClass(status) {
   if (isDelayed(value) || value === 'boarding') return 'warn';
   if (value === 'checked-in' || value === 'security-cleared' || value === 'boarded' || value === 'on time') return 'ok';
   return 'info';
+}
+const FLIGHT_STATUS_CHOICES = ['On Time', 'Boarding', 'Delayed', 'Cancelled'];
+function flightStatusOptions(current) {
+  const list = FLIGHT_STATUS_CHOICES.includes(current) ? FLIGHT_STATUS_CHOICES : [current, ...FLIGHT_STATUS_CHOICES];
+  return list.map((value) => `<option value="${esc(value)}"${value === current ? ' selected' : ''}>${esc(value)}</option>`).join('');
 }
 function statusBadge(status) { return `<span class="status-badge ${statusClass(status)}">${esc(status)}</span>`; }
 function emptyState(title, detail) { return `<div class="empty-state"><span class="empty-icon">${icon('inbox', 26)}</span><strong>${esc(title)}</strong>${esc(detail || '')}</div>`; }
@@ -1506,7 +1537,96 @@ function toast(title, message, isError = false) {
   node.querySelector('.toast-close').addEventListener('click', dismiss);
   window.setTimeout(dismiss, 4300);
 }
-function askConfirm(message) { return window.confirm(message); }
+/* ---------- Styled dialogs (replace native prompt and confirm boxes) ---------- */
+function dialogFieldMarkup(field) {
+  const attrs = [
+    `name="${esc(field.name)}"`,
+    `data-label="${esc(field.label)}"`,
+    field.required === false ? '' : 'required',
+    field.min != null ? `min="${esc(field.min)}"` : '',
+    field.max != null ? `max="${esc(field.max)}"` : '',
+    field.step != null ? `step="${esc(field.step)}"` : '',
+    field.minlength ? `minlength="${esc(field.minlength)}"` : '',
+    field.maxlength ? `maxlength="${esc(field.maxlength)}"` : '',
+    field.pattern ? `pattern="${esc(field.pattern)}"` : '',
+    field.placeholder ? `placeholder="${esc(field.placeholder)}"` : '',
+    `autocomplete="${esc(field.autocomplete || 'off')}"`
+  ].filter(Boolean).join(' ');
+  const control = Array.isArray(field.options)
+    ? `<select ${attrs}>${field.options.map((option) => {
+        const value = typeof option === 'object' ? option.value : option;
+        const label = typeof option === 'object' ? option.label : option;
+        return `<option value="${esc(value)}"${String(value) === String(field.value) ? ' selected' : ''}>${esc(label)}</option>`;
+      }).join('')}</select>`
+    : `<input type="${esc(field.type || 'text')}" value="${esc(field.value ?? '')}" ${attrs}>`;
+  return `<label class="${field.full ? 'ui-span-2' : ''}">${esc(field.label)}${control}${field.hint ? `<span class="hint">${esc(field.hint)}</span>` : ''}</label>`;
+}
+
+// Opens an accessible modal. Resolves with the field values (or true when
+// there are no fields) on submit, and with null when it is dismissed.
+function uiDialog({ title, subtitle = '', message = '', fields = null, submitLabel = 'Save', cancelLabel = 'Cancel', tone = 'primary', iconName = 'info' }) {
+  return new Promise((resolve) => {
+    const dialog = document.createElement('dialog');
+    dialog.className = `ui-dialog tone-${tone}`;
+    dialog.setAttribute('aria-labelledby', 'uiDialogTitle');
+    dialog.innerHTML = `<form class="ui-dialog-card" novalidate>
+      <div class="ui-dialog-head">
+        <span class="ui-dialog-icon" aria-hidden="true">${icon(iconName, 20)}</span>
+        <div class="ui-dialog-titles"><h2 id="uiDialogTitle">${esc(title)}</h2>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}</div>
+        <button type="button" class="ui-dialog-x" data-dialog-cancel aria-label="Close">${icon('close', 16)}</button>
+      </div>
+      ${message ? `<p class="ui-dialog-message">${esc(message)}</p>` : ''}
+      ${fields ? `<div class="ui-dialog-fields">${fields.map(dialogFieldMarkup).join('')}</div>` : ''}
+      <p class="ui-dialog-error" role="alert" hidden></p>
+      <div class="ui-dialog-actions">
+        <button type="button" class="button button-outline" data-dialog-cancel>${esc(cancelLabel)}</button>
+        <button type="submit" class="button ${tone === 'danger' ? 'button-danger-solid' : 'button-primary'}">${esc(submitLabel)}</button>
+      </div>
+    </form>`;
+    document.body.appendChild(dialog);
+
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      dialog.classList.add('is-closing');
+      window.setTimeout(() => { if (dialog.open) dialog.close(); dialog.remove(); }, prefersReducedMotion() ? 0 : 170);
+      resolve(value);
+    };
+    dialog.addEventListener('cancel', (event) => { event.preventDefault(); finish(null); });
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || event.target.closest('[data-dialog-cancel]')) finish(null);
+    });
+    dialog.addEventListener('input', (event) => event.target.classList.remove('invalid'));
+
+    const form = dialog.querySelector('form');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!fields) { finish(true); return; }
+      const invalid = [...form.elements].find((el) => el.willValidate && !el.checkValidity());
+      const errorBox = form.querySelector('.ui-dialog-error');
+      if (invalid) {
+        invalid.classList.add('invalid');
+        invalid.focus();
+        errorBox.textContent = `${invalid.dataset.label}: ${invalid.validationMessage}`;
+        errorBox.hidden = false;
+        return;
+      }
+      const values = {};
+      fields.forEach((field) => { values[field.name] = form.elements[field.name].value; });
+      finish(values);
+    });
+
+    dialog.showModal();
+    const first = dialog.querySelector('.ui-dialog-fields input, .ui-dialog-fields select') || dialog.querySelector('[type="submit"]');
+    if (first) first.focus();
+  });
+}
+
+async function askConfirm(message, { title = 'Please confirm', confirmLabel = 'Confirm', tone = 'danger' } = {}) {
+  const result = await uiDialog({ title, message, submitLabel: confirmLabel, cancelLabel: 'Go back', tone, iconName: tone === 'danger' ? 'alert' : 'info' });
+  return result === true;
+}
 function setCustomError(element, message) {
   element.setCustomValidity(message || '');
 }
@@ -1706,7 +1826,7 @@ function renderFlights() {
   let flights = state.flights.filter((f) => [f.flightNumber, f.airline, f.source, f.destination, f.status, f.gate, f.fare].some((v) => norm(v).includes(term)));
   flights.sort(sort === 'no' ? (a, b) => a.flightNumber.localeCompare(b.flightNumber) : sort === 'to' ? (a, b) => a.destination.localeCompare(b.destination) : sort === 'fare' ? (a, b) => Number(a.fare) - Number(b.fare) : sort === 'duration' ? (a, b) => (flightDurationMinutes(a) ?? Number.MAX_SAFE_INTEGER) - (flightDurationMinutes(b) ?? Number.MAX_SAFE_INTEGER) : (a, b) => timeNumber(a.departureTime) - timeNumber(b.departureTime));
   $('#flightCount').textContent = `${state.flights.length} flight${state.flights.length === 1 ? '' : 's'}`;
-  $('#flightTable').innerHTML = `<thead><tr><th>Departure</th><th>Flight</th><th>Airline / Route</th><th>Duration</th><th>Fare</th><th>Gate</th><th>Status</th><th>Actions</th></tr></thead><tbody>${flights.length ? flights.map((f) => `<tr><td>${esc(f.departureTime)}<span class="cell-sub">Arrives ${esc(f.arrivalTime)}</span></td><td class="cell-strong">${esc(f.flightNumber)}</td><td>${esc(f.airline)}<span class="cell-sub">${esc(f.source)} → ${esc(f.destination)}</span></td><td>${esc(formatDuration(flightDurationMinutes(f)))}</td><td class="fare-cell">${esc(formatFare(f.fare))}</td><td>${esc(f.gate)}</td><td>${statusBadge(f.status)}</td><td><div class="table-actions"><button class="table-action" data-action="edit-flight" data-id="${esc(f.flightNumber)}" type="button">Edit</button><button class="table-action" data-action="set-flight-status" data-id="${esc(f.flightNumber)}" data-status="Delayed" type="button">Delay</button><button class="table-action" data-action="set-flight-status" data-id="${esc(f.flightNumber)}" data-status="On Time" type="button">On time</button><button class="table-action" data-action="set-flight-status" data-id="${esc(f.flightNumber)}" data-status="Boarding" type="button">Boarding</button><button class="table-action danger" data-action="set-flight-status" data-id="${esc(f.flightNumber)}" data-status="Cancelled" type="button">Cancel</button><button class="table-action danger" data-action="delete-flight" data-id="${esc(f.flightNumber)}" type="button">Delete</button></div></td></tr>`).join('') : `<tr><td colspan="8">${emptyState('No matching flights', 'Clear the search or add a flight.')}</td></tr>`}</tbody>`;
+  $('#flightTable').innerHTML = `<thead><tr><th>Departure</th><th>Flight</th><th>Airline / Route</th><th>Duration</th><th>Fare</th><th>Gate</th><th>Status</th><th>Actions</th></tr></thead><tbody>${flights.length ? flights.map((f) => `<tr><td>${esc(f.departureTime)}<span class="cell-sub">Arrives ${esc(f.arrivalTime)}</span></td><td class="cell-strong">${esc(f.flightNumber)}</td><td>${esc(f.airline)}<span class="cell-sub">${esc(f.source)} → ${esc(f.destination)}</span></td><td>${esc(formatDuration(flightDurationMinutes(f)))}</td><td class="fare-cell">${esc(formatFare(f.fare))}</td><td>${esc(f.gate)}</td><td>${statusBadge(f.status)}</td><td><div class="table-actions"><label class="status-select"><span class="sr-only">Status for ${esc(f.flightNumber)}</span><select data-flight-status-select data-id="${esc(f.flightNumber)}">${flightStatusOptions(f.status)}</select></label><button class="table-action icon-only" data-action="edit-flight" data-id="${esc(f.flightNumber)}" type="button" title="Edit ${esc(f.flightNumber)}" aria-label="Edit ${esc(f.flightNumber)}">${icon('edit', 15)}</button><button class="table-action icon-only danger" data-action="delete-flight" data-id="${esc(f.flightNumber)}" type="button" title="Delete ${esc(f.flightNumber)}" aria-label="Delete ${esc(f.flightNumber)}">${icon('trash', 15)}</button></div></td></tr>`).join('') : `<tr><td colspan="8">${emptyState('No matching flights', 'Clear the search or add a flight.')}</td></tr>`}</tbody>`;
 }
 function renderFlightOptions() {
   const items = state.flights.map((f) => ({ value: f.flightNumber, label: `${f.flightNumber} · ${f.source} → ${f.destination}${isCancelled(f.status) ? ' · CANCELLED' : ''}` }));
@@ -1812,7 +1932,7 @@ async function addFlight(event) {
       `${result.flightNumber} has been saved to MySQL.`
     );
 
-    console.log('Flight saved in database:', result);
+    debugLog('Flight saved in database:', result);
 
   } catch (error) {
     console.error('Add flight API error:', error);
@@ -1830,36 +1950,26 @@ async function updateFlightDetails(id) {
   const flight = getFlight(id);
   if (!flight) return;
 
-  // Collect updated flight details using the existing UI.
-  const airline = window.prompt('Airline:', flight.airline);
-  if (airline === null) return;
+  // Collect updated flight details in one styled form.
+  const values = await uiDialog({
+    title: `Edit flight ${flight.flightNumber}`,
+    subtitle: 'Changes are validated and saved to MySQL through the API.',
+    submitLabel: 'Save flight',
+    iconName: 'plane',
+    fields: [
+      { name: 'airline', label: 'Airline', value: flight.airline, maxlength: 50, full: true },
+      { name: 'source', label: 'Source', value: flight.source, maxlength: 60 },
+      { name: 'destination', label: 'Destination', value: flight.destination, maxlength: 60 },
+      { name: 'departureTime', label: 'Departure time', type: 'time', value: flight.departureTime },
+      { name: 'arrivalTime', label: 'Arrival time', type: 'time', value: flight.arrivalTime },
+      { name: 'gate', label: 'Gate', value: flight.gate, maxlength: 10 },
+      { name: 'fare', label: 'Fare (INR)', type: 'number', min: 0, step: '0.01', value: String(flight.fare ?? 0) }
+    ]
+  });
+  if (!values) return;
 
-  const source = window.prompt('Source:', flight.source);
-  if (source === null) return;
-
-  const destination = window.prompt('Destination:', flight.destination);
-  if (destination === null) return;
-
-  const departureTime = window.prompt(
-    'Departure time (HH:MM):',
-    flight.departureTime
-  );
-  if (departureTime === null) return;
-
-  const arrivalTime = window.prompt(
-    'Arrival time (HH:MM):',
-    flight.arrivalTime
-  );
-  if (arrivalTime === null) return;
-
-  const gate = window.prompt('Gate:', flight.gate);
-  if (gate === null) return;
-
-  const fareInput = window.prompt(
-    'Fare in INR:',
-    String(flight.fare ?? 0)
-  );
-  if (fareInput === null) return;
+  const { airline, source, destination, departureTime, arrivalTime, gate } = values;
+  const fareInput = values.fare;
 
   const fare = Number(fareInput);
 
@@ -1941,7 +2051,7 @@ async function updateFlightDetails(id) {
       `${flight.flightNumber} was updated in MySQL.`
     );
 
-    console.log('Updated flight:', result);
+    debugLog('Updated flight:', result);
 
   } catch (error) {
     console.error('Flight update failed:', error);
@@ -1964,9 +2074,10 @@ async function setFlightStatus(id, newStatus) {
 
   if (
     newStatus === 'Cancelled' &&
-    !askConfirm(
-      `Cancel ${flight.flightNumber} to ${flight.destination}? Affected passengers will be notified and removed from check-in, boarding and priority queues.`
-    )
+    !(await askConfirm(
+      `Affected passengers will be notified and removed from check-in, boarding and priority queues.`,
+      { title: `Cancel ${flight.flightNumber} to ${flight.destination}?`, confirmLabel: 'Cancel flight' }
+    ))
   ) {
     return;
   }
@@ -2074,7 +2185,7 @@ async function deleteFlight(id) {
     );
   }
 
-  if (!askConfirm(`Delete flight ${id}?`)) return;
+  if (!(await askConfirm('This permanently removes the flight record from MySQL.', { title: `Delete flight ${id}?`, confirmLabel: 'Delete flight' }))) return;
 
   // Delete the flight from MySQL first.
   try {
@@ -2258,7 +2369,7 @@ async function addPassenger(event) {
       `${result.name} was assigned to ${result.flightNumber} with status ${result.status}.`
     );
 
-    console.log('Passenger saved in MySQL:', result);
+    debugLog('Passenger saved in MySQL:', result);
 
   } catch (error) {
     console.error('Passenger registration error:', error);
@@ -2284,30 +2395,31 @@ async function updatePassengerDetails(id) {
     );
   }
 
-  // Collect updated details using the existing prompts.
-  const name = window.prompt('Passenger name:', p.name);
-  if (name === null) return;
+  // Collect updated details in one styled form.
+  const flightChoices = state.flights
+    .filter((f) => !isCancelled(f.status) || norm(f.flightNumber) === norm(p.flightNumber))
+    .map((f) => ({ value: f.flightNumber, label: `${f.flightNumber} · ${f.source} → ${f.destination} · ${f.departureTime}` }));
+  const assistanceChoices = ['None', 'Emergency', 'Medical', 'Wheelchair', 'Accessibility', 'Elderly', 'VIP', 'Other'];
+  if (p.assistanceType && !assistanceChoices.includes(p.assistanceType)) assistanceChoices.push(p.assistanceType);
 
-  const ageText = window.prompt('Age (0-120):', String(p.age));
-  if (ageText === null) return;
+  const values = await uiDialog({
+    title: `Edit passenger ${p.passengerId}`,
+    subtitle: 'Details can be changed until the passenger checks in.',
+    submitLabel: 'Save passenger',
+    iconName: 'user',
+    fields: [
+      { name: 'name', label: 'Full name', value: p.name, minlength: 2, maxlength: 80, full: true },
+      { name: 'age', label: 'Age', type: 'number', min: 0, max: 120, step: 1, value: String(p.age) },
+      { name: 'phoneNumber', label: 'Phone number', type: 'tel', value: p.phoneNumber, pattern: '[+0-9() -]{7,16}', maxlength: 16 },
+      { name: 'flightNumber', label: 'Flight', value: p.flightNumber, options: flightChoices, full: true },
+      { name: 'seatNumber', label: 'Seat number', value: p.seatNumber, maxlength: 6 },
+      { name: 'assistanceType', label: 'Assistance type', value: p.assistanceType || 'None', options: assistanceChoices }
+    ]
+  });
+  if (!values) return;
 
-  const phoneNumber = window.prompt('Phone number:', p.phoneNumber);
-  if (phoneNumber === null) return;
-
-  const flightNumber = window.prompt(
-    `Flight number (active flights: ${state.flights.filter((f) => !isCancelled(f.status)).map((f) => f.flightNumber).join(', ')}):`,
-    p.flightNumber
-  );
-  if (flightNumber === null) return;
-
-  const seatNumber = window.prompt('Seat number:', p.seatNumber);
-  if (seatNumber === null) return;
-
-  const assistanceType = window.prompt(
-    'Assistance type (None, Emergency, Medical, Wheelchair, Accessibility, Elderly, VIP, Other):',
-    p.assistanceType
-  );
-  if (assistanceType === null) return;
+  const { name, phoneNumber, flightNumber, seatNumber, assistanceType } = values;
+  const ageText = values.age;
 
   const age = Number(ageText);
   const flight = getFlight(flightNumber);
@@ -2418,7 +2530,7 @@ async function updatePassengerDetails(id) {
       `${p.name}'s record was successfully updated in MySQL.`
     );
 
-    console.log('Passenger updated in MySQL:', result);
+    debugLog('Passenger updated in MySQL:', result);
 
   } catch (error) {
     console.error('Passenger update error:', error);
@@ -2436,9 +2548,10 @@ async function deletePassenger(id) {
   const p = getPassenger(id);
   if (!p) return;
 
-  if (!askConfirm(
-    `Delete passenger ${p.name} (${p.passengerId})? The record can be restored with Undo.`
-  )) return;
+  if (!(await askConfirm(
+    'The record can be restored with Undo delete.',
+    { title: `Delete ${p.name} (${p.passengerId})?`, confirmLabel: 'Delete passenger' }
+  ))) return;
 
   try {
     const response = await apiFetch(`${API_BASE_URL}/passengers/delete`, {
@@ -2488,7 +2601,7 @@ async function deletePassenger(id) {
       `${p.name} was deleted from MySQL. Use Undo to restore the record.`
     );
 
-    console.log('Deleted passenger:', result);
+    debugLog('Deleted passenger:', result);
 
   } catch (error) {
     console.error('Passenger deletion error:', error);
@@ -2567,7 +2680,7 @@ async function undoDelete() {
       `${result.name} was successfully restored in MySQL. Queue positions are not automatically restored.`
     );
 
-    console.log('Restored passenger:', result);
+    debugLog('Restored passenger:', result);
 
   } catch (error) {
     console.error('Passenger restoration error:', error);
@@ -3025,7 +3138,7 @@ async function loadAssistanceHistoryFromApi() {
 
     renderAssistanceHistory();
 
-    console.log(
+    debugLog(
       `Loaded ${data.length} completed AeroAssist requests.`
     );
 
@@ -3423,7 +3536,7 @@ async function createTravelGroup(event) {
       `${groupName} (${groupId}) is linked to flight ${flight.flightNumber}.`
     );
 
-    console.log('Group saved in MySQL:', result.group);
+    debugLog('Group saved in MySQL:', result.group);
 
   } catch (error) {
     console.error('Group creation API error:', error);
@@ -3534,7 +3647,7 @@ async function addPassengerToTravelGroup(event) {
       `${passenger.name} was added to ${group.groupName}.`
     );
 
-    console.log('Group membership saved in MySQL:', result);
+    debugLog('Group membership saved in MySQL:', result);
 
   } catch (error) {
     console.error('Group member API error:', error);
@@ -5232,11 +5345,16 @@ async function markBaggageCollected(tag) {
     );
   }
 
-  const enteredPassengerId = window.prompt(
-    `Enter passenger ID to confirm collection of ${baggage.tag}:`
-  );
+  const verification = await uiDialog({
+    title: `Release baggage ${baggage.tag}`,
+    subtitle: 'Ask the passenger for their ID before handing over the bag.',
+    submitLabel: 'Confirm collection',
+    iconName: 'bag',
+    fields: [{ name: 'passengerId', label: 'Passenger ID', placeholder: 'e.g. P101', maxlength: 30, full: true }]
+  });
 
-  if (enteredPassengerId === null) return;
+  if (!verification) return;
+  const enteredPassengerId = verification.passengerId;
 
   if (norm(enteredPassengerId) !== norm(baggage.passengerId)) {
     return toast(
@@ -5629,8 +5747,8 @@ function renderAll() {
   if (typeof window.onStateRendered === 'function') window.onStateRendered();
 }
 
-function resetDemo() {
-  if (!askConfirm('Reset all browser demo data to the starting sample? This will remove changes made in this browser.')) return;
+async function resetDemo() {
+  if (!(await askConfirm('This will remove changes made in this browser.', { title: 'Reset demo data?', confirmLabel: 'Reset demo' }))) return;
   state = demoState(); activeRoutePath = []; activeRouteWeight = null; saveState();
   $('#flightForm').reset(); $('#passengerForm').reset(); $('#priorityForm').reset(); $('#groupCreateForm').reset(); $('#groupAddForm').reset(); $('#emergencyForm').reset();$('#baggageForm').reset();
 $('#baggageIssueForm').reset();
@@ -5691,6 +5809,12 @@ $('#baggagePassenger').addEventListener('change', () => {
   }
 });
 document.addEventListener('change', (event) => {
+  const flightStatusSelect = event.target.closest('[data-flight-status-select]');
+  if (flightStatusSelect) {
+    flightStatusSelect.disabled = true;
+    Promise.resolve(setFlightStatus(flightStatusSelect.dataset.id, flightStatusSelect.value)).finally(() => renderFlights());
+    return;
+  }
   const statusSelect = event.target.closest('[data-emergency-status]');
   if (statusSelect) updateEmergencyStatus(statusSelect.dataset.caseId, statusSelect.value);
   const baggageIssueSelect = event.target.closest('[data-baggage-issue-status]');
@@ -5877,6 +6001,34 @@ window.addEventListener('storage', (event) => {
   window.syncedFromStorage = true;
   try { renderAll(); } finally { window.syncedFromStorage = false; }
 });
+
+// Update an emergency case status through the API (Open → In Progress → Resolved).
+async function updateEmergencyStatus(caseId, nextStatus) {
+  const incident = state.emergencyCases.find((item) => norm(item.caseId) === norm(caseId));
+  if (!incident) return toast('Case not found', `No emergency case matches ${caseId}.`, true);
+  if (incident.status === nextStatus) return;
+
+  try {
+    const response = await apiFetch(`${API_BASE_URL}/emergencies/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({ caseId: incident.caseId, status: nextStatus }).toString()
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.status === 'error') {
+      throw new Error(data.message || `HTTP error: ${response.status}`);
+    }
+    const saved = data.incident && data.incident.caseId ? data.incident : { ...incident, status: nextStatus };
+    const index = state.emergencyCases.findIndex((item) => norm(item.caseId) === norm(saved.caseId));
+    if (index >= 0) state.emergencyCases[index] = { ...state.emergencyCases[index], ...saved };
+    saveState();
+    renderEmergencyRegister();
+    toast('Case updated', `${incident.caseId} is now ${nextStatus}.`);
+  } catch (error) {
+    renderEmergencyRegister();
+    toast('Case status not saved', error.message || 'Check your API server connection.', true);
+  }
+}
 
 // Expose only common actions for progressive enhancement and browser console testing.
 window.AeroStructDemo = {
