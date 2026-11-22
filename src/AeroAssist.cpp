@@ -2,30 +2,31 @@
 #include <algorithm>
 #include <string>
 #include <cctype>
-
-namespace
+using namespace std;
+namespace //Anonymous Namespace 
 {
-    std::string toLower(std::string value)
+    string toLower(string value) // converts the string to lowerCase
     {
-        std::transform(value.begin(), value.end(), value.begin(),
-            [](unsigned char ch)
+        transform(value.begin(), value.end(), value.begin(), //starting position, position before final chaarcter, position where transformed characters are written
+            [](unsigned char ch)                                   
             {
-                return static_cast<char>(std::tolower(ch));
+                return static_cast<char>(tolower(ch));//lambda function(inline function) receives 
+                                                           //one character and converts to lowercase
             });
         return value;
     }
 
-    bool contains(const std::string& text, const std::string& word)
+    bool contains(const string& text, const string& word) // find word inside text
     {
-        return text.find(word) != std::string::npos;
+        return text.find(word) != string::npos;
     }
 }
 
-AeroAssistAdvice AeroAssist::getAdvice(const std::string& assistanceType)
+AeroAssistAdvice AeroAssist::getAdvice(const string& assistanceType)
 {
-    const std::string type = toLower(assistanceType);
+    const string type = toLower(assistanceType);//turns the user input to lower case
 
-    if (contains(type, "emergency"))
+    if (contains(type, "emergency")) //check whether on string contains another
     {
         return {1, "Emergency", "Emergency Response Team",
                 "Contact the designated emergency staff immediately."};
