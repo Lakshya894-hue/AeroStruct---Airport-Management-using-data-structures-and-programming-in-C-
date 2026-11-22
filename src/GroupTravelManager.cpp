@@ -17,16 +17,17 @@ string GroupTravelManager::normalize(string value)
 {
     for (char& ch : value)
     {
-        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+        ch = static_cast<char>(tolower(static_cast<unsigned char>(ch))); //unsigned prevents passing a negative char value to lower
     }
 
     return value;
 }
 
 // Find a group by its ID.
-GroupTravelManager::GroupNode*
+GroupTravelManager::GroupNode* 
 GroupTravelManager::findGroup(const string& groupId) const
 {
+    // const at end means function promises not to modify object's state
     GroupNode* current = head;
 
     while (current != nullptr)
@@ -65,7 +66,7 @@ bool GroupTravelManager::isPassengerAlreadyGrouped(const string& passengerId) co
     return false;
 }
 
-// Destructor: free every member node and group node.
+// Destructor: free every member node and group node to prevent memory leaks
 GroupTravelManager::~GroupTravelManager()
 {
     while (head != nullptr)
@@ -91,6 +92,194 @@ bool GroupTravelManager::isEmpty() const
     return head == nullptr;
 }
 
+std::size_t GroupTravelManager::getGroupCount() const
+{
+    return groupCount;
+}
+
+bool GroupTravelManager::createGroupRecord(
+    const TravelGroupRecord& record,
+    FlightManager& flightManager,
+    std::string& message)
+{
+    auto isBlank = [](const std::string& value)
+    {
+        return value.find_first_not_of(" \t\r\n") ==
+               std::string::npos;
+    };
+
+    if (isBlank(record.groupId) ||
+        isBlank(record.groupName) ||
+        isBlank(record.flightNumber) ||
+        record.groupId.size() > 24 ||
+        record.groupName.size() > 80 ||
+        record.flightNumber.size() > 20)
+    {
+        message = "Invalid group details.";
+        return false;
+    }
+
+    if (findGroup(record.groupId) != nullptr)
+    {
+        message = "Group ID already exists.";
+        return false;
+    }
+
+    // Validate the associated flight.
+    std::string flightStatus;
+
+    if (!flightManager.getFlightStatus(
+            record.flightNumber, flightStatus))
+    {
+        message = "Group flight does not exist.";
+        return false;
+    }
+
+    flightStatus = normalize(flightStatus);
+
+    if (flightStatus == "cancelled" ||
+        flightStatus == "canceled" ||
+        flightStatus == "completed")
+    {
+        message = "Group flight is unavailable.";
+        return false;
+    }
+
+    // Create the actual linked-list node.
+    GroupNode* newGroup = new GroupNode(
+        record.groupId,
+        record.groupName,
+        record.flightNumber
+    );
+
+    // Preserve the existing insertion-at-head behavior.
+    newGroup->next = head;
+    head = newGroup;
+
+    ++groupCount;
+
+    message = "Travel group created successfully.";
+    return true;
+}
+
+bool GroupTravelManager::addPassengerRecord(
+    const std::string& groupId,
+    const std::string& passengerId,
+    const std::string& passengerFlightNumber,
+    FlightManager& flightManager,
+    std::string& message)
+{
+    if (groupId.empty() ||
+        groupId.size() > 24 ||
+        passengerId.empty() ||
+        passengerId.size() > 30 ||
+        passengerFlightNumber.empty())
+    {
+        message = "Invalid group or passenger details.";
+        return false;
+    }
+
+    GroupNode* group = findGroup(groupId);
+
+    if (group == nullptr)
+    {
+        message = "Group not found.";
+        return false;
+    }
+
+    // Ensure the group's flight is still available.
+    std::string flightStatus;
+
+    if (!flightManager.getFlightStatus(
+            group->flightNumber, flightStatus))
+    {
+        message = "Group flight does not exist.";
+        return false;
+    }
+
+    flightStatus = normalize(flightStatus);
+
+    if (flightStatus == "cancelled" ||
+        flightStatus == "canceled" ||
+        flightStatus == "completed")
+    {
+        message = "Group flight is unavailable.";
+        return false;
+    }
+
+    // All group members must travel on the group's flight.
+    if (normalize(passengerFlightNumber) !=
+        normalize(group->flightNumber))
+    {
+        message = "Passenger belongs to a different flight.";
+        return false;
+    }
+
+    // A passenger can belong to only one group.
+    if (isPassengerAlreadyGrouped(passengerId))
+    {
+        message = "Passenger already belongs to a travel group.";
+        return false;
+    }
+
+    MemberNode* newMember = new MemberNode(passengerId);
+
+    // Append to the member linked list.
+    if (group->members == nullptr)
+    {
+        group->members = newMember;
+    }
+    else
+    {
+        MemberNode* current = group->members;
+
+        while (current->next != nullptr)
+        {
+            current = current->next;
+        }
+
+        current->next = newMember;
+    }
+
+    ++group->memberCount;
+
+    message = "Passenger added to travel group successfully.";
+    return true;
+}
+
+bool GroupTravelManager::getGroupAt(
+    std::size_t index,
+    TravelGroupRecord& record) const
+{
+    GroupNode* current = head;
+    std::size_t currentIndex = 0;
+
+    while (current != nullptr && currentIndex < index)
+    {
+        current = current->next;
+        ++currentIndex;
+    }
+
+    if (current == nullptr)
+        return false;
+
+    record = TravelGroupRecord{};
+
+    record.groupId = current->groupId;
+    record.groupName = current->groupName;
+    record.flightNumber = current->flightNumber;
+
+    MemberNode* member = current->members;
+
+    while (member != nullptr)
+    {
+        record.passengerIds.push_back(member->passengerId);
+        member = member->next;
+    }
+
+    return true;
+}
+
 // Create a new group for one flight.
 void GroupTravelManager::createGroup(FlightManager& flightManager)
 {
@@ -113,9 +302,7 @@ void GroupTravelManager::createGroup(FlightManager& flightManager)
     cout << "Enter Flight Number: ";
     getline(cin >> ws, flightNumber);
 
-    if (groupId.empty() ||
-        groupName.empty() ||
-        flightNumber.empty())
+    if (groupId.empty() || groupName.empty() || flightNumber.empty())
     {
         cout << "Group ID, name and flight number are required.\n";
         return;
@@ -124,8 +311,7 @@ void GroupTravelManager::createGroup(FlightManager& flightManager)
     // Validate the selected flight.
     string flightStatus;
 
-    if (!flightManager.getFlightStatus(
-            flightNumber, flightStatus))
+    if (!flightManager.getFlightStatus(flightNumber, flightStatus))
     {
         cout << "Group not created: flight does not exist.\n";
         return;
@@ -133,16 +319,13 @@ void GroupTravelManager::createGroup(FlightManager& flightManager)
 
     flightStatus = normalize(flightStatus);
 
-    if (flightStatus == "cancelled" ||
-        flightStatus == "canceled" ||
-        flightStatus == "completed")
+    if (flightStatus == "cancelled" || flightStatus == "canceled" || flightStatus == "completed")
     {
         cout << "Group not created: flight is not available.\n";
         return;
     }
 
-    GroupNode* newGroup =
-        new GroupNode(groupId, groupName, flightNumber);
+    GroupNode* newGroup = new GroupNode(groupId, groupName, flightNumber);
 
     // Insert the new group at the head of the linked list.
     newGroup->next = head;
@@ -157,8 +340,7 @@ void GroupTravelManager::createGroup(FlightManager& flightManager)
 }
 
 // Add an existing passenger to a group.
-void GroupTravelManager::addPassengerToGroup(
-    PassengerManager& passengerManager,
+void GroupTravelManager::addPassengerToGroup(PassengerManager& passengerManager,
     FlightManager& flightManager)
 {
     string groupId, passengerId;
@@ -187,9 +369,7 @@ void GroupTravelManager::addPassengerToGroup(
 
     flightStatus = normalize(flightStatus);
 
-    if (flightStatus == "cancelled" ||
-        flightStatus == "canceled" ||
-        flightStatus == "completed")
+    if (flightStatus == "cancelled" || flightStatus == "canceled" || flightStatus == "completed")
     {
         cout << "Cannot add member: group flight is unavailable.\n";
         return;
@@ -203,8 +383,7 @@ void GroupTravelManager::addPassengerToGroup(
     string passengerFlight, seat, assistance, status;
     int age;
 
-    if (!passengerManager.getPassengerQueueDetails(
-            passengerId, name, age, gender, phone,
+    if (!passengerManager.getPassengerQueueDetails(passengerId, name, age, gender, phone,
             passengerFlight, seat, assistance, status))
     {
         cout << "Passenger not found. Register them first.\n";
@@ -212,11 +391,9 @@ void GroupTravelManager::addPassengerToGroup(
     }
 
     // All group members must be assigned to the group's flight.
-    if (normalize(passengerFlight) !=
-        normalize(group->flightNumber))
+    if (normalize(passengerFlight) != normalize(group->flightNumber))
     {
-        cout << "Passenger belongs to flight "
-             << passengerFlight << ", not group flight "
+        cout << "Passenger belongs to flight "<< passengerFlight << ", not group flight "
              << group->flightNumber << ".\n";
 
         cout << "Passenger was not added.\n";
@@ -255,8 +432,7 @@ void GroupTravelManager::addPassengerToGroup(
 }
 
 // Display group information using live passenger statuses.
-void GroupTravelManager::displayGroupStatuses(
-    PassengerManager& passengerManager,
+void GroupTravelManager::displayGroupStatuses(PassengerManager& passengerManager,
     FlightManager& flightManager) const
 {
     if (isEmpty())
@@ -273,8 +449,7 @@ void GroupTravelManager::displayGroupStatuses(
     {
         string flightStatus;
 
-        bool flightExists = flightManager.getFlightStatus(
-            group->flightNumber, flightStatus);
+        bool flightExists = flightManager.getFlightStatus(group->flightNumber, flightStatus);
 
         size_t total = 0;
         size_t checkedIn = 0;
@@ -288,8 +463,7 @@ void GroupTravelManager::displayGroupStatuses(
             string flight, seat, assistance, status;
             int age;
 
-            bool found = passengerManager.getPassengerQueueDetails(
-                member->passengerId,
+            bool found = passengerManager.getPassengerQueueDetails(member->passengerId,
                 name, age, gender, phone,
                 flight, seat, assistance, status);
 
@@ -298,8 +472,7 @@ void GroupTravelManager::displayGroupStatuses(
                 ++total;
                 string normalizedStatus = normalize(status);
 
-                if (normalizedStatus == "checked-in" ||
-                    normalizedStatus == "checked in" ||
+                if (normalizedStatus == "checked-in" || normalizedStatus == "checked in" ||
                     normalizedStatus == "security-cleared" ||
                     normalizedStatus == "security cleared" ||
                     normalizedStatus == "boarded")
