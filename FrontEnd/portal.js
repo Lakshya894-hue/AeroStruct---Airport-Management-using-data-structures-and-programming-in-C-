@@ -405,7 +405,7 @@ function boardingPass(passenger, flight) {
       </dl>
     </div>
     <div class="bp-stub">
-      <div class="bp-countdown"><small>${unavailable ? 'Flight status' : 'Departure'}</small><strong>${esc(countdown)}</strong></div>
+      <div class="bp-countdown"><small>${unavailable ? 'Flight status' : 'Departure'}</small><strong${!unavailable && diff >= 0 ? ` data-departs="${esc(flight.departureTime)}"` : ''}>${esc(countdown)}</strong></div>
       ${barcodeSvg(passenger.passengerId + flight.flightNumber)}
       <small class="bp-id">${esc(passenger.passengerId)} · Seat ${esc(passenger.seatNumber)}</small>
     </div>
