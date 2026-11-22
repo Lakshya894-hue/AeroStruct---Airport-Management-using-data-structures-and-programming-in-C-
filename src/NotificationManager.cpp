@@ -1,7 +1,9 @@
 #include "NotificationManager.h"
+#include <limits>
 #include <iostream>
 #include <cctype>
-
+#include "FlightManager.h"
+#include "PassengerManager.h"
 using namespace std;
 namespace
 {
@@ -24,11 +26,9 @@ namespace
             }
         }
 
-        int hours =
-            (time[0] - '0') * 10 + (time[1] - '0');
+        int hours = (time[0] - '0') * 10 + (time[1] - '0');
 
-        int minutes =
-            (time[3] - '0') * 10 + (time[4] - '0');
+        int minutes = (time[3] - '0') * 10 + (time[4] - '0');
 
         if (hours > 23 || minutes > 59)
         {
@@ -40,11 +40,7 @@ namespace
         return true;
     }
 }
-NotificationManager::Node::Node(
-    int id, 
-    const string& pId,
-    const string& pName,
-    const string& fNumber,
+NotificationManager::Node::Node(long long id, const string& pId, const string& pName,const string& fNumber,
     NotificationType notificationType,
     const string& notificationMessage)
     : notificationId(id),
@@ -63,6 +59,17 @@ NotificationManager::NotificationManager()
     tail = nullptr;
     size = 0;
     nextNotificationId = 1;
+
+    flightManager = nullptr;
+    passengerManager = nullptr;
+}
+void NotificationManager::setFlightManager(FlightManager& manager)
+{
+    flightManager = &manager;
+}
+void NotificationManager::setPassengerManager(PassengerManager& manager)
+{
+    passengerManager = &manager;
 }
 
 NotificationManager::~NotificationManager() //destructor
@@ -81,21 +88,14 @@ NotificationManager::~NotificationManager() //destructor
     size = 0;
 }
 
-bool NotificationManager::hasRequiredDetails(
-    const string& passengerId,
-    const string& passengerName,
+bool NotificationManager::hasRequiredDetails(const string& passengerId, const string& passengerName,
     const string& flightNumber)
 {
-    return !passengerId.empty() &&
-           !passengerName.empty() &&
-           !flightNumber.empty();
+    return (!passengerId.empty() && !passengerName.empty() && !flightNumber.empty());
 }
 
-void NotificationManager::addNotification(
-    const string& passengerId,
-    const string& passengerName,
-    const string& flightNumber,
-    NotificationType type,
+void NotificationManager::addNotification(const string& passengerId, const string& passengerName,
+    const string& flightNumber, NotificationType type,
     const string& message)
 {
     if (!hasRequiredDetails(passengerId, passengerName, flightNumber))
@@ -103,7 +103,77 @@ void NotificationManager::addNotification(
         cout << "Notification not created. Passenger ID, name, and flight number are required.\n";
         return;
     }
+    // A FlightManager must be connected before notifications are created.
+    if (flightManager == nullptr)
+    {
+        cout << "Notification rejected: Flight Manager is not connected.\n";
+        return;
+    }
 
+    // Verify that the flight number exists in Flight Management.
+    string registeredFlightStatus;
+
+    if (!flightManager->getFlightStatus(flightNumber, registeredFlightStatus))
+    {
+        cout << "\n[Notification Rejected]\n";
+        cout << "Flight " << flightNumber << " is not registered in Flight Management.\n";
+        cout << "No notification has been created.\n";
+        return;
+    }
+
+    // Verify that the managers are connected.
+    if (passengerManager == nullptr || flightManager == nullptr)
+    {
+        cout << "Notification rejected: managers are not connected.\n";
+        return;
+    }
+
+    // Retrieve the actual registered passenger details.
+    string registeredName;
+    string registeredFlight;
+    string gender, phone, seat, assistance, status;
+    int age;
+
+    if (!passengerManager->getPassengerQueueDetails(passengerId,registeredName,age,gender,
+        phone, registeredFlight, seat, assistance, status))
+    {
+        cout << "\n[Notification Rejected]\n";
+        cout << "Passenger ID " << passengerId<< " is not registered.\n";
+        cout << "No notification has been created.\n";
+        return;
+    }
+
+    // Normalize flight numbers for comparison.
+    auto normalize = [](string value)
+    {
+        for (char& ch : value)
+        {
+            ch = static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+        }
+
+        return value;
+    };
+
+    // Ensure the passenger belongs to the specified flight.
+    if (normalize(registeredFlight) != normalize(flightNumber))
+    {
+        cout << "\n[Notification Rejected]\n";
+        cout << "Passenger " << passengerId << " is not registered on flight " << flightNumber << ".\n";
+        cout << "No notification has been created.\n";
+        return;
+    }
+
+    // Confirm that the flight exists.
+
+    if (!flightManager->getFlightStatus(flightNumber, registeredFlightStatus))
+    {
+        cout << "\n[Notification Rejected]\n";
+        cout << "Flight " << flightNumber << " does not exist.\n";
+        cout << "No notification has been created.\n";
+        return;
+    }
+    
+    //dynamiccally allocates array for one node
     Node* newNode = new Node(nextNotificationId++, passengerId,passengerName, flightNumber, type, message);
 
     if (head == nullptr)
@@ -149,24 +219,18 @@ string NotificationManager::getTypeName(NotificationType type) //enum class
     }
 }
 
-void NotificationManager::sendCheckInReminder(
-    const string& passengerId,
-    const string& passengerName,
+void NotificationManager::sendCheckInReminder(const string& passengerId, const string& passengerName,
     const string& flightNumber) //receives details
 {
     const string message = "Hello " + passengerName +
         ", check-in is open for flight " + flightNumber +
         ". Please proceed to the check-in counter.";
 
-    addNotification(passengerId, passengerName, flightNumber,
-                    NotificationType::CheckInReminder, message);
+    addNotification(passengerId, passengerName, flightNumber, NotificationType::CheckInReminder, message);
 }
 
-void NotificationManager::sendBoardingReminder(
-    const string& passengerId,
-    const string& passengerName,
-    const string& flightNumber,
-    const string& gate)
+void NotificationManager::sendBoardingReminder(const string& passengerId, const string& passengerName,
+    const string& flightNumber, const string& gate)
 {
     string message = "Hello " + passengerName +
         ", boarding for flight " + flightNumber + " is starting.";
@@ -180,8 +244,7 @@ void NotificationManager::sendBoardingReminder(
         message += " Please check the airport displays for your gate.";
     }
 
-    addNotification(passengerId, passengerName, flightNumber,
-                    NotificationType::BoardingReminder, message);
+    addNotification(passengerId, passengerName, flightNumber, NotificationType::BoardingReminder, message);
 }
 
 void NotificationManager::notifyGateChange(const string& passengerId,const string& passengerName,
@@ -244,9 +307,7 @@ void NotificationManager::notifyDelay(
     addNotification(passengerId, passengerName, flightNumber,NotificationType::Delay, message);
 }
 
-void NotificationManager::notifyCancellation(
-    const string& passengerId,
-    const string& passengerName,
+void NotificationManager::notifyCancellation(const string& passengerId, const string& passengerName,
     const string& flightNumber,
     const string& reason)
 {
@@ -265,14 +326,9 @@ void NotificationManager::notifyCancellation(
 }
 
 
-bool NotificationManager::notifyConnectionRisk(
-    const string& passengerId,
-    const string& passengerName,
-    const string& arrivingFlightNumber,
-    const string& arrivalTime,
-    int transferMinutes,
-    const string& connectingFlightNumber,
-    const string& nextDepartureTime,
+bool NotificationManager::notifyConnectionRisk(const string& passengerId, const string& passengerName, 
+    const string& arrivingFlightNumber, const string& arrivalTime, int transferMinutes,
+    const string& connectingFlightNumber, const string& nextDepartureTime,
     int minimumBufferMinutes)
 {
     // Step 1: Validate required passenger and flight details.
@@ -296,7 +352,7 @@ bool NotificationManager::notifyConnectionRisk(
     int arrivalMinutes;
     int departureMinutes;
 
-    if (!parseTimeToMinutes(arrivalTime, arrivalMinutes) ||
+    if (!parseTimeToMinutes(arrivalTime, arrivalMinutes) || 
         !parseTimeToMinutes(nextDepartureTime, departureMinutes))
     {
         cout << "Connection-risk check failed: "
@@ -312,12 +368,12 @@ bool NotificationManager::notifyConnectionRisk(
     }
 
     // Step 5: Calculate when the passenger finishes transferring.
-    const long long transferCompleteMinutes =
-        static_cast<long long>(arrivalMinutes) + transferMinutes;
+    // transferMinutes: estimated time needed to transfer between flights.
+    const long long transferCompleteMinutes = static_cast<long long>(arrivalMinutes) + transferMinutes;
 
     // Step 6: Calculate the remaining buffer before departure.
-    const long long availableBufferMinutes =
-        static_cast<long long>(departureMinutes) -
+    // minimumBufferMinutes: minimum spare time that should remain before departure.
+    const long long availableBufferMinutes = static_cast<long long>(departureMinutes) -
         transferCompleteMinutes;
 
     // Step 7: No alert is needed if the buffer meets the threshold.
@@ -332,8 +388,7 @@ bool NotificationManager::notifyConnectionRisk(
     }
 
     // Step 8: Construct the personalized risk message.
-    string message =
-        "Hello " + passengerName +
+    string message = "Hello " + passengerName +
         ", a tight connection has been detected between arriving flight " +
         arrivingFlightNumber +
         " and connecting flight " + connectingFlightNumber + ".";
@@ -500,4 +555,194 @@ bool NotificationManager::isEmpty() const
 int NotificationManager::getSize() const
 {
     return size;
+}
+
+bool NotificationManager::appendNotificationRecord(
+    const NotificationRecord& record,
+    std::string& message)
+{
+    if (record.notificationId <= 0 ||
+        record.passengerId.empty() ||
+        record.passengerId.size() > 30 ||
+        record.passengerName.empty() ||
+        record.passengerName.size() > 100 ||
+        record.flightNumber.empty() ||
+        record.flightNumber.size() > 20 ||
+        record.type.empty() ||
+        record.type.size() > 50 ||
+        record.message.empty() ||
+        record.message.size() > 1000)
+    {
+        message = "Invalid notification record.";
+        return false;
+    }
+
+    // Prevent duplicate notification IDs.
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        if (current->notificationId == record.notificationId)
+        {
+            message = "Notification ID already exists.";
+            return false;
+        }
+
+        current = current->next;
+    }
+
+    if (record.notificationId ==
+        std::numeric_limits<long long>::max())
+    {
+        message = "Notification ID exceeds the supported range.";
+        return false;
+    }
+
+    // Map the API label to the existing C++ notification enum.
+    // Custom labels are preserved separately in typeLabel.
+    std::string typeKey = record.type;
+
+    for (char& ch : typeKey)
+    {
+        ch = static_cast<char>(
+            std::tolower(static_cast<unsigned char>(ch))
+        );
+    }
+
+    NotificationType mappedType = NotificationType::FlightStatus;
+
+    if (typeKey.find("check") != std::string::npos)
+        mappedType = NotificationType::CheckInReminder;
+    else if (typeKey.find("boarding") != std::string::npos)
+        mappedType = NotificationType::BoardingReminder;
+    else if (typeKey.find("gate") != std::string::npos)
+        mappedType = NotificationType::GateChange;
+    else if (typeKey.find("cancellation") != std::string::npos)
+        mappedType = NotificationType::Cancellation;
+    else if (typeKey.find("delay") != std::string::npos)
+        mappedType = NotificationType::Delay;
+    else if (typeKey.find("connection") != std::string::npos)
+        mappedType = NotificationType::ConnectionRisk;
+
+    // Create the linked-list node.
+    Node* newNode = new Node(
+        record.notificationId,
+        record.passengerId,
+        record.passengerName,
+        record.flightNumber,
+        mappedType,
+        record.message
+    );
+
+    // Preserve the exact API notification label and timestamp.
+    newNode->typeLabel = record.type;
+    newNode->createdAt = record.createdAt;
+    newNode->isRead = record.isRead;
+
+    // Append at the tail to preserve the supplied order.
+    if (head == nullptr)
+    {
+        head = newNode;
+        tail = newNode;
+    }
+    else
+    {
+        tail->next = newNode;
+        tail = newNode;
+    }
+
+    ++size;
+
+    if (record.notificationId >= nextNotificationId)
+    {
+        nextNotificationId = record.notificationId + 1;
+    }
+
+    message = "Notification added successfully.";
+    return true;
+}
+
+bool NotificationManager::getNotificationAt(
+    std::size_t index,
+    NotificationRecord& record) const
+{
+    Node* current = head;
+
+    std::size_t currentIndex = 0;
+
+    while (current != nullptr && currentIndex < index)
+    {
+        current = current->next;
+        ++currentIndex;
+    }
+
+    if (current == nullptr)
+        return false;
+
+    record.notificationId = current->notificationId;
+    record.passengerId = current->passengerId;
+    record.passengerName = current->passengerName;
+    record.flightNumber = current->flightNumber;
+
+    record.type = current->typeLabel.empty()
+        ? getTypeName(current->type)
+        : current->typeLabel;
+
+    record.message = current->message;
+    record.isRead = current->isRead;
+    record.createdAt = current->createdAt;
+
+    return true;
+}
+
+bool NotificationManager::setNotificationReadRecord(
+    long long notificationId,
+    bool isRead,
+    std::string& message)
+{
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        if (current->notificationId == notificationId)
+        {
+            current->isRead = isRead;
+
+            message = isRead
+                ? "Notification marked as read."
+                : "Notification marked as unread.";
+
+            return true;
+        }
+
+        current = current->next;
+    }
+
+    message = "Notification not found.";
+    return false;
+}
+
+std::size_t NotificationManager::markAllNotificationRecordsRead(
+    const std::string& passengerId)
+{
+    std::size_t markedCount = 0;
+
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        const bool matchesPassenger =
+            passengerId.empty() ||
+            current->passengerId == passengerId;
+
+        if (matchesPassenger && !current->isRead)
+        {
+            current->isRead = true;
+            ++markedCount;
+        }
+
+        current = current->next;
+    }
+
+    return markedCount;
 }
