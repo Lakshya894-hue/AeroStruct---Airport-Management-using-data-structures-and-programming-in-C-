@@ -149,7 +149,7 @@
   });
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setMenu(false); });
 
-  const sectionIds = ['home', 'features', 'modules', 'technology', 'about'];
+  const sectionIds = ['home', 'features', 'showcase', 'modules', 'technology', 'about', 'portals'];
   function updateActiveLink() {
     const probe = window.scrollY + (nav ? nav.offsetHeight : 64) + window.innerHeight * 0.28;
     let active = 'home';
