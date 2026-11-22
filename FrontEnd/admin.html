@@ -8,6 +8,9 @@
   <title>Admin Portal · AeroStruct</title>
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preload" as="image" href="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=1400&q=66" imagesrcset="https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=800&q=72 800w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=1400&q=66 1400w, https://images.unsplash.com/photo-1629221731259-4f0760e3ee89?auto=format&fit=crop&w=2000&q=66 2000w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="is-gate portal-mode-admin" data-portal-mode="admin">
@@ -62,9 +65,9 @@
           </defs>
           <path id="lp1" class="l-arc" d="M-30 600 C 240 250, 700 110, 1090 250 S 1380 430, 1480 340"/>
           <path id="lp2" class="l-arc l-arc-2" d="M180 740 C 520 540, 900 590, 1190 430 S 1370 210, 1480 170"/>
-          <path id="lp3" class="l-arc l-arc-3" d="M-30 360 C 200 240, 430 210, 650 270"/>
+          <path id="lp3" class="l-arc l-arc-3" d="M-30 520 C 200 470, 520 470, 760 560"/>
           <g class="l-radar" transform="translate(1090 250)"><circle class="core" r="5"/><circle class="ring" r="6"/><circle class="ring d2" r="6"/><circle class="ring d3" r="6"/><text x="12" y="-12">BOM</text></g>
-          <g class="l-radar" transform="translate(650 270)"><circle class="core" r="4"/><circle class="ring" r="5"/><circle class="ring d2" r="5"/><text x="10" y="-10">DEL</text></g>
+          <g class="l-radar" transform="translate(760 560)"><circle class="core" r="4"/><circle class="ring" r="5"/><circle class="ring d2" r="5"/><text x="10" y="-10">DEL</text></g>
           <g class="l-radar" transform="translate(1190 430)"><circle class="core" r="4"/><circle class="ring d3" r="5"/><circle class="ring d2" r="5"/><text x="10" y="18">BLR</text></g>
           <g class="l-plane"><use href="#plane-glyph"/><animateMotion dur="17s" repeatCount="indefinite" rotate="auto"><mpath href="#lp1"/></animateMotion></g>
           <g class="l-plane l-plane-2"><use href="#plane-glyph"/><animateMotion dur="23s" begin="-8s" repeatCount="indefinite" rotate="auto"><mpath href="#lp2"/></animateMotion></g>
@@ -300,6 +303,7 @@
       <!-- DASHBOARD -->
       <section id="dashboard" class="view">
         <div id="nextDeparture" class="hero-card"></div>
+        <div id="opsTicker" class="ops-ticker" aria-label="Recent operational activity"></div>
         <div class="stats-grid" id="stats"></div>
         <div class="dashboard-grid">
           <section class="panel departures-panel">
@@ -392,25 +396,8 @@
             <div class="panel-body"><div class="form-row"><label>Checked-in passenger<select id="scSel" required></select></label><label>Boarding gate<input id="scGate" placeholder="Auto-filled from flight" maxlength="10" required></label><button class="button button-primary align-end" id="scClear" type="button">Clear security</button></div><p class="muted" id="scHelp">Choose a passenger to load the flight's gate.</p></div>
           </section>
           <section class="panel">
-            <div class="panel-heading"><div><span class="eyebrow">QUEUE · FIFO</span><div class="panel-heading">
-  <div>
-    <!-- <span class="eyebrow"></span> -->
-    <h2>Boarding</h2>
-    <p class="panel-subtitle">Passengers are automatically added after successful security clearance.</p>
-  </div>
-  <span id="boCount" class="count-pill">0 waiting</span>
-</div>
-
-<div class="panel-body"><p class="panel-subtitle">Passengers are automatically added after successful security clearance.</p>
-            <div class="panel-body">
-            <div id="boList" class="queue-list"></div>
-            <div class="queue-footer">
-            <p class="muted" id="boWait"></p>
-            <button class="button button-primary" id="boProcess" type="button">
-                  Board next passenger →
-            </button>
-             </div>
-            </div>
+            <div class="panel-heading"><div><span class="eyebrow">QUEUE · FIFO</span><h2>Boarding</h2><p class="panel-subtitle">Passengers are automatically added after successful security clearance.</p></div><span id="boCount" class="count-pill">0 waiting</span></div>
+            <div class="panel-body"><div id="boList" class="queue-list"></div><div class="queue-footer"><p class="muted" id="boWait"></p><button class="button button-primary" id="boProcess" type="button">Board next passenger →</button></div></div>
           </section>
         </div>
         <section class="panel"><div class="panel-heading"><div><span class="eyebrow">STATUS SYNCHRONIZATION</span><h2>Passenger journey status</h2><p class="panel-subtitle">Registered → Checked-In → Security-Cleared → Boarded</p></div></div><div class="table-scroll"><table id="journeyTable" class="data-table"></table></div></section>
@@ -1184,7 +1171,9 @@
   </div>
 
   <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <script src="enhance.js"></script>
   <script src="app.js"></script>
   <script src="portal.js"></script>
+  <script src="experience.js"></script>
 </body>
 </html>
