@@ -1,448 +1,390 @@
-# AeroStruct – Airport Management System
+# ✈️ AeroStruct – Airport Management System
 
-## Project Description
+**A C++17 and Data Structures Based Airport Management System**
 
-AeroStruct is an Airport Management System developed using C++,
-Data Structures, Algorithms, Object-Oriented Programming and MySQL.
-The system is designed to manage flights, passengers, check-in,
-boarding, baggage, priority handling and airport routes while
-providing passenger-centric assistance and intelligent airport
-services.
+AeroStruct is a full-stack Airport Management System designed to simplify airport operations, manage passenger services and improve the overall travel experience. It combines C++ business logic, Data Structures and Algorithms (DSA), MySQL database management and a web-based frontend.
 
-The project demonstrates the practical application of Data
-Structures, Algorithms and OOP concepts to a real-world airport
-management scenario.
+The system provides separate portals for administrators and passengers, allowing airport operations to be managed securely while giving passengers access to their own travel-related services.
 
 ---
 
-## Problem Statement
+## 📌 Project Overview
 
-Airports handle large numbers of passengers, flights, baggage,
-queues and operational activities simultaneously. Inefficient
-management of these processes can result in long waiting times,
-difficulty in retrieving records, baggage mismatches, poor handling
-of priority passengers and difficulty in navigating airport
-facilities.
+AeroStruct aims to provide an integrated platform for managing essential airport operations, including:
 
-AeroStruct aims to provide a structured and integrated system for
-managing these operations efficiently using appropriate Data
-Structures, Algorithms, OOP concepts and database management.
+- Passenger registration and management.
+- Flight scheduling and management.
+- Check-in and boarding operations.
+- Baggage registration and tracking.
+- Emergency and priority passenger handling.
+- Airport navigation and route management.
+- Group travel management.
+- Notifications and passenger assistance.
 
----
+The project demonstrates how fundamental and advanced data structures can be integrated into a practical, real-world management application.
 
-## Objectives
+## ✨ Key Features
 
-- Manage flight and passenger records efficiently.
-- Handle check-in and boarding queues using appropriate Data Structures.
-- Provide priority handling for emergency, VIP and assistance cases.
-- Track baggage and detect passenger-baggage inconsistencies.
-- Manage airport routes using Graph algorithms.
-- Provide passenger-oriented airport navigation and assistance.
-- Integrate C++ Data Structures with MySQL persistent storage.
-- Demonstrate the practical application of DSA, Algorithms and OOP.
+### 1. Flight Management
+- Add, view, search and update flight records.
+- Manage flight schedules and statuses.
+- Search and sort flight information.
+- Maintain flight-related database records.
 
----
+### 2. Passenger Management
+- Register and manage passenger information.
+- Maintain passenger records.
+- Support administrator and passenger access.
+- Restrict passenger access to their own information.
 
-# Team Members
+### 3. Check-in and Boarding
+- Manage passenger check-in queues.
+- Maintain boarding queues.
+- Process passenger boarding operations.
+- Manage queue-based operations.
 
-| Name | Role | Major Contribution |
-|---|---|---|
-| Lakshya Sharma | Project Lead | Project planning, architecture, Flight Management, Graph, system integration,Stacks for undo operations, OOPS concept combine|
-| Kuber Dhoundiyal | Developer | Passenger Management, Linked List, Queue, OOPS concept combine,Check-in and Boarding |
-| Arihant Singh | Database & Testing | MySQL, Priority Queue, Stacks for undo operations, Searching, Sorting, Graph algorithms and Testing |
+### 4. Baggage Management
+- Register passenger baggage.
+- Track baggage records and status.
+- Handle baggage collection and reported issues.
+- Manage baggage handling queues.
 
----
+### 5. Emergency Management
+- Maintain emergency case records.
+- Associate affected passengers with incidents.
+- Manage emergency status and related operations.
 
-# Technologies Used
+### 6. Priority Passenger Management
+- Handle VIP and emergency passenger priority.
+- Process passengers according to priority.
 
-- C++17
-- Data Structures and Algorithms
-- Object-Oriented Programming
-- MySQL
-- HTML5
-- CSS3
-- C++ Standard Template Library (STL)
-- GCC/G++
-- Visual Studio Code
-- Git & GitHub
+### 7. AeroAssist
+- Provide airport assistance and passenger support.
+- Integrate assistance-related functionality.
 
----
+### 8. Smart Flight Suggestions
+- Provide flight suggestions based on available flight information.
 
-# Major Modules
+### 9. Airport Navigation
+- Represent airport locations and connections.
+- Manage airport paths.
+- Support graph-based navigation and route exploration.
 
-## 1. Flight Management
-- Add flight
-- Update flight
-- Delete flight
-- Search flight
-- Sort flights
-- Cancel flight
-- Flight status management
+### 10. Group Travel
+- Manage travel groups.
+- Maintain group membership information.
 
-## 2. Passenger Management
-- Passenger registration
-- Search passenger
-- Update passenger
-- Delete passenger
-- Passenger record management
+### 11. Notification Management
+- Store and manage passenger notifications.
+- Support notification reading and tracking.
 
-## 3. Check-in Management
-- Passenger check-in
-- FIFO queue processing
-- Queue status monitoring
-
-## 4. Boarding Management
-- Boarding queue
-- FIFO processing
-- Boarding status management
-
-## 5. Priority Passenger Management
-- Emergency passenger handling
-- VIP passenger handling
-- Senior-citizen and assistance requests
-- Priority-based processing
-
-## 6. Baggage Management
-- Baggage registration
-- Baggage tracking
-- Passenger-baggage association
-- Baggage status management
-
-## 7. Airport Route Management
-- Airport/location representation using Graphs
-- Route creation
-- BFS traversal
-- DFS traversal
-- Shortest-path calculation using Dijkstra's Algorithm
-
-## 8. Database Management
-- MySQL database integration
-- Persistent passenger records
-- Persistent flight records
-- CRUD operations
-- Data retrieval and updating
+### 12. Authentication and Access Control
+- Separate administrator and passenger login.
+- Password-based authentication.
+- Session-based authentication.
+- Role-based access restrictions.
+- Protected API operations.
 
 ---
 
-# Advanced Passenger-Centric Features
+## 🧰 Technology Stack
 
-AeroStruct extends beyond basic airport record management by
-introducing passenger-oriented assistance and intelligent services.
-
-## AeroAssist – Personalized Passenger Assistance
-
-AeroAssist is designed to provide a personalized view of a
-passenger's airport journey.
-
-Features include:
-
-- Passenger flight information
-- Current flight status
-- Gate information
-- Boarding status
-- Next-action guidance
-- Queue/waiting-time information
-- Passenger-specific notifications
-
-Example workflow:
-
-Booking → Check-in → Security → Gate → Boarding → Departure
-
----
-
-## Airport Navigator
-
-The Airport Navigator helps passengers find routes between
-locations inside the airport.
-
-Possible destinations include:
-
-- Boarding gates
-- Check-in counters
-- Security checkpoints
-- Restrooms
-- Medical facilities
-- Information desks
-- Food and service areas
-
-Graph algorithms can be used to determine suitable routes.
-
----
-
-## Smart Time-to-Gate Assistance
-
-The system can estimate whether a passenger has sufficient time to
-reach the assigned gate based on:
-
-- Passenger's current location
-- Gate location
-- Estimated route
-- Boarding time
-- Simulated walking/travel time
-
-The system can provide an appropriate next action such as:
-
-Proceed to gate / Move immediately / Boarding approaching
-
----
-
-## AeroTrack – Intelligent Baggage Tracking
-
-AeroTrack maintains the relationship between passengers, flights
-and baggage.
-
-Possible baggage stages include:
-
-Checked-in → Security → Loaded → In Transit → Arrived → Collected
-
-Each baggage item can have a unique identification code.
-
----
-
-## Baggage-Passenger Consistency Checker
-
-The system can verify whether baggage is associated with the
-correct:
-
-- Passenger
-- Flight
-- Destination
-
-Possible mismatches can be flagged for staff attention.
-
----
-
-## Flight Cancellation Assistance
-
-When a flight is cancelled, the system can identify passengers
-associated with the affected flight and provide relevant
-assistance information.
-
-The module can support:
-
-- Identifying affected passengers
-- Identifying associated baggage
-- Checking passenger status
-- Finding alternative flights
-- Updating passenger records
-
----
-
-## Smart Alternative Flight Finder
-
-For affected or connecting passengers, the system can search for
-available alternative flights based on configurable criteria such
-as:
-
-- Destination
-- Departure time
-- Availability
-- Number of stops
-- Travel duration
-
-Searching and sorting algorithms can be used to process candidate
-flights.
-
----
-
-## Emergency Assistance System
-
-The Emergency Assistance module provides structured handling of
-emergency-related passenger requests.
-
-It can:
-
-- Register emergency cases
-- Prioritize emergency passengers
-- Identify affected passengers
-- Locate nearby emergency or medical facilities
-- Provide route information
-- Generate an incident record
-
-Priority Queues and Graph algorithms are used for the corresponding
-operations.
-
----
-
-## Accessibility Assistance
-
-Passengers requiring assistance can submit requests for services
-such as:
-
-- Wheelchair assistance
-- Elderly passenger assistance
-- Special mobility assistance
-
-Requests can be handled using priority-based processing.
-
----
-
-## Personalized Airport Notifications
-
-Passengers can receive notifications related to their journey,
-such as:
-
-- Check-in reminders
-- Boarding reminders
-- Gate changes
-- Flight status updates
-- Delays
-- Cancellation information
-
----
-
-## Family and Group Travel Assistance
-
-For passengers travelling together, the system can provide group
-status information such as:
-
-- Number of passengers checked in
-- Number of passengers pending
-- Group boarding status
-- Group flight information
-
----
-
-## Digital Passenger Journey Timeline
-
-The system can display the passenger's journey as a sequence of
-airport stages:
-
-Booking
-→ Check-in
-→ Security
-→ Boarding Gate
-→ Boarding
-→ Departure
-→ Arrival
-→ Baggage Collection
-
-This provides passengers with a clear view of their current stage.
-
----
-
-## Airport Services Finder
-
-Passengers can search for airport facilities such as:
-
-- Medical centre
-- Restroom
-- Food area
-- ATM
-- Information desk
-- Check-in counter
-- Gate
-
-Graph-based route calculation can be used to guide passengers to
-these facilities.
-
----
-
-## Emergency Service Locator
-
-Using the airport Graph, the system can determine a route from the
-passenger's current location to the nearest available emergency or
-medical facility.
-
-Dijkstra's Algorithm can be used when route distances are weighted.
-
----
-
-## Gate Change Assistance
-
-When a gate changes, the system can display:
-
-Previous gate → New gate
-
-and calculate a route to the new gate using the airport navigation
-Graph.
-
----
-
-## Connection Risk Detection
-
-For connecting passengers, the system can compare:
-
-Arrival time + transfer time
-
-with
-
-Next flight departure time
-
-and identify cases where the available transfer period is below a
-configured threshold.
-
----
-
-## Lost and Unclaimed Baggage Assistance
-
-The system can support:
-
-- Lost baggage reporting
-- Baggage detail registration
-- Matching reported baggage with stored records
-- Unclaimed baggage identification
-
----
-
-# Data Structures Used
-
-| Data Structure | Application |
+| Technology | Purpose |
 |---|---|
-| Array | Flight records and fixed-size collections |
-| Linked List | Passenger and baggage records |
-| Queue | Check-in and boarding |
-| Priority Queue | Emergency, VIP and assistance requests |
-| Stack | Undo/recent-operation management |
-| Graph | Airport locations and routes |
+| C++17 | Backend business logic |
+| C | Data structures and algorithm implementations where applicable |
+| HTML5 | Frontend structure |
+| CSS3 | Frontend styling and responsive layouts |
+| JavaScript | Frontend functionality and API communication |
+| MySQL | Persistent database storage |
+| CMake | Backend build configuration |
+| MySQL X DevAPI | C++ database connectivity |
+| REST APIs | Frontend-backend communication |
+| libsodium | Authentication-related cryptographic functionality |
+| Git and GitHub | Version control and collaboration |
 
 ---
 
-# Algorithms Used
+## 🧠 Data Structures and Algorithms
 
-- Linear Search
-- Binary Search
-- Sorting Algorithms
-- BFS
-- DFS
-- Dijkstra's Shortest Path Algorithm
+AeroStruct uses different data structures to handle airport operations efficiently.
 
----
-
-# DSA–Feature Mapping
-
-| Feature | Data Structure / Algorithm |
+| Data Structure / Algorithm | Application |
 |---|---|
-| Passenger records | Linked List |
-| Check-in | Queue |
-| Boarding | Queue |
-| Emergency assistance | Priority Queue |
-| VIP handling | Priority Queue |
-| Undo operations | Stack |
-| Airport navigation | Graph |
-| Facility locator | Graph + Dijkstra |
-| Airport connectivity | BFS / DFS |
-| Flight search | Searching |
-| Flight ordering | Sorting |
-| Alternative flight finder | Searching + Sorting |
-| Baggage association | Linked List / Database |
-| Waiting-time estimation | Queue |
+| Linked List | Passenger record management |
+| Queue | Check-in operations |
+| Queue | Boarding operations |
+| Priority Queue | VIP and emergency passengers |
+| Stack | Undo recent operations |
+| Graph | Airport navigation and connectivity |
+| BFS / DFS | Graph traversal |
+| Dijkstra's Algorithm | Shortest-path navigation |
+| Binary Search | Flight searching |
+| Sorting Algorithms | Flight sorting |
+
+The project demonstrates the practical application of data structures in managing real-world airport operations.
 
 ---
 
-# System Workflow
+## 🗄️ Database Architecture
+
+AeroStruct uses MySQL for persistent data storage.
+
+**Database Name:** `aerostruct_db`
+
+The database currently contains 18 tables:
+
+| Table | Purpose |
+|---|---|
+| `airports` | Airport information |
+| `airport_locations` | Airport location records |
+| `airport_paths` | Connections between airport locations |
+| `passengers` | Passenger records |
+| `flights` | Flight information |
+| `users` | Authentication accounts |
+| `auth_sessions` | Authentication sessions |
+| `checkin_queue` | Check-in queue records |
+| `boarding_queue` | Boarding queue records |
+| `baggage_records` | Baggage information |
+| `baggage_handling_queue` | Baggage handling operations |
+| `emergency_cases` | Emergency incident records |
+| `emergency_case_passengers` | Passengers associated with incidents |
+| `assistance_queue` | Assistance requests |
+| `assistance_request_history` | Assistance request history |
+| `travel_groups` | Group travel records |
+| `travel_group_members` | Group membership information |
+| `notifications` | Passenger notifications |
+
+The database supports persistent storage and retrieval of information across the application's modules.
+
+---
+
+## 🏗️ System Architecture
+
+AeroStruct follows a frontend-backend-database architecture.
 
 ```text
-User Input
-     ↓
-Input Validation
-     ↓
-C++ Application Layer
-     ↓
-Data Structures & Algorithms
-     ↓
-MySQL Database
-     ↓
-Processing / Decision Making
-     ↓
-Passenger / Admin Output
+             AEROSTRUCT APPLICATION
+                      |
+           +----------+----------+
+           |                     |
+      ADMIN PORTAL          PASSENGER PORTAL
+           |                     |
+           +----------+----------+
+                      |
+                HTML / CSS
+                JavaScript
+                      |
+                  REST APIs
+                      |
+               C++17 API SERVER
+                      |
+          +-----------+-----------+
+          |           |           |
+       Flight      Passenger   Baggage
+       Routes       Routes      Routes
+          |           |           |
+          +-----------+-----------+
+                      |
+                   MySQL
+                      |
+                 aerostruct_db
+```
+
+The frontend communicates with the C++ API server through HTTP requests. The backend handles application logic, authorization and database operations.
+
+---
+
+## 📂 Project Structure
+
+The repository is organized into the following major components:
+
+```text
+AeroStruct/
+│
+├── FrontEnd/
+│   ├── index.html
+│   ├── admin.html
+│   ├── passenger.html
+│   ├── style.css
+│   ├── app.js
+│   └── portal.js
+│
+├── server/
+│   ├── routes/
+│   ├── CMakeLists.txt
+│   └── api_main.cpp
+│
+├── src/
+│   ├── Flight.cpp
+│   ├── Flight.h
+│   ├── Passenger.cpp
+│   ├── Passenger.h
+│   └── other project modules
+│
+├── README.md
+└── .gitignore
+```
+
+*The tree represents the principal project components; additional files and modules are maintained in their respective directories.*
+
+---
+
+## ⚙️ Installation and Setup
+
+### Prerequisites
+
+Install and configure the following:
+
+- Windows operating system.
+- Visual Studio with C++ development tools.
+- CMake.
+- MySQL Server.
+- MySQL X Plugin / X DevAPI support.
+- vcpkg and required C++ dependencies.
+- Node.js for frontend JavaScript syntax checking.
+- Google Chrome or another modern browser.
+
+### 1. Clone the Repository
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+```
+
+Navigate to the project directory:
+
+```bash
+cd AeroStruct---Airport-Management-using-data-structures-and-programming-in-C-
+```
+
+### 2. Database Configuration
+
+Create the database:
+
+```sql
+CREATE DATABASE aerostruct_db;
+```
+
+Configure the MySQL connection using the project's existing server configuration and launcher setup.
+
+The application uses MySQL connectivity through the MySQL X DevAPI service.
+
+### 3. Build the Backend
+
+Open PowerShell in the project root and execute:
+
+```powershell
+cmake --build .\server\build-auth --config Release
+```
+
+### 4. Start the API Server
+
+Use the project launcher:
+
+```powershell
+.\Start-AeroStruct.bat
+```
+
+The API server runs at:
+
+```text
+http://127.0.0.1:8080
+```
+
+Keep the server terminal running while using the application.
+
+### 5. Launch the Frontend
+
+Open the `FrontEnd` directory using Visual Studio Code.
+
+Start the frontend through Live Server.
+
+The application provides the following entry points:
+
+| Portal | File |
+|---|---|
+| Homepage | `index.html` |
+| Administrator Portal | `admin.html` |
+| Passenger Portal | `passenger.html` |
+
+For example, with Live Server running on port 5501:
+
+```text
+http://127.0.0.1:5501/index.html
+http://127.0.0.1:5501/admin.html
+http://127.0.0.1:5501/passenger.html
+```
+
+---
+
+## 🔐 Authentication and Security
+
+AeroStruct implements separate authentication flows for administrators and passengers.
+
+### Administrator
+- Administrative dashboard access.
+- Passenger account provisioning.
+- Flight and operational management.
+- Authorized administrative operations.
+
+### Passenger
+- Personal passenger portal.
+- Access to authorized passenger information.
+- Passenger-related services.
+- Restricted access to administrative operations.
+
+Authentication is handled through protected API requests and database-backed sessions.
+
+**Security note:** The current application is intended for local development and demonstration. Production deployment should include HTTPS, secure session management, credential protection, rate limiting and additional security review.
+
+---
+
+## 🧪 Testing and Verification
+
+The application can be tested through:
+
+- Frontend functionality testing.
+- REST API endpoint testing.
+- MySQL record verification.
+- Administrator and passenger authentication testing.
+- Role-based authorization testing.
+- Data structure operation testing.
+- Database persistence testing.
+- Responsive layout testing.
+
+MySQL Workbench can be used to inspect database tables and verify that application operations are persisted.
+
+---
+
+## 🚀 Future Enhancements
+
+Potential future improvements include:
+
+- Advanced airport analytics.
+- Database backup and recovery interface.
+- Comprehensive audit logging.
+- Enhanced passenger notifications.
+- Advanced reporting and operational insights.
+- Further UI/UX improvements.
+
+---
+
+## 👨‍💻 Project Development
+
+**Project:** AeroStruct – Airport Management System Using Data Structures and C++
+
+**Development Approach:** Team-based development
+
+**Version Control:** GitHub
+
+The project is developed collaboratively, with team members contributing to frontend development, backend modules, data structures, database integration and testing.
+
+---
+
+## 📜 Conclusion
+
+AeroStruct demonstrates the integration of C++ programming, Data Structures and Algorithms, MySQL database management and web development to address practical airport management requirements.
+
+By combining modular backend services, persistent database storage, role-based authentication and dedicated user portals, the project provides an integrated approach to airport operations management.
+
+**AeroStruct – Smarter Operations. Better Airport Experiences.** ✈️
