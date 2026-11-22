@@ -3,9 +3,20 @@
 
 #include <string>
 #include <cstddef>
+#include <vector>
 
 class PassengerManager;
 class FlightManager;
+
+// API-friendly representation of a travel group.
+struct TravelGroupRecord
+{
+    std::string groupId;
+    std::string groupName;
+    std::string flightNumber;
+
+    std::vector<std::string> passengerIds;
+};
 
 class GroupTravelManager
 {
@@ -60,6 +71,9 @@ public:
     GroupTravelManager();
     ~GroupTravelManager();
 
+    GroupTravelManager(const GroupTravelManager&) = delete;
+    GroupTravelManager& operator=(const GroupTravelManager&) = delete;
+
     void createGroup(FlightManager& flightManager);
 
     void addPassengerToGroup(
@@ -71,6 +85,28 @@ public:
         FlightManager& flightManager) const;
 
     bool isEmpty() const;
+
+    // API-friendly group management operations.
+    std::size_t getGroupCount() const;
+
+    bool createGroupRecord(
+    const TravelGroupRecord& record,
+    FlightManager& flightManager,
+    std::string& message
+   );
+
+    bool addPassengerRecord(
+    const std::string& groupId,
+    const std::string& passengerId,
+    const std::string& passengerFlightNumber,
+    FlightManager& flightManager,
+    std::string& message
+    );
+
+    bool getGroupAt(
+    std::size_t index,
+    TravelGroupRecord& record
+    ) const;
 };
 
 #endif
